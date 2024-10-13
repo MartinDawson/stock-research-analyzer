@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import { convertAndFilterPriceData } from '../cleanData.js';
 import { processData, processTimeseriesData } from './processData.js';
-import { analyzeData } from './analysis.js';
+import { analyzeData } from './analyze.js';
 import { extractColumnHeaderAndData } from '../data.js';
 
 dayjs.extend(customParseFormat);

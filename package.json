@@ -5,9 +5,14 @@
     "axios": "^1.7.7",
     "csv-parse": "^5.5.6",
     "csv-writer": "^1.6.0",
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "mathjs": "^13.2.0"
   },
   "scripts": {
+    "test": "vitest",
     "acquisitions:us": "node ./src/acquisitions/index.js ./data/acquisitions/us/data.csv ./data/acquisitions/us/acquirerSharePrices.csv ./data/acquisitions/us/acquirerSPXIndexPrices.csv"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.2"
   }
 }

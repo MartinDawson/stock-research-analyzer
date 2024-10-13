@@ -1,4 +1,9 @@
 import dayjs from 'dayjs';
+import * as math from 'mathjs';
+
+function roundToDecimal(number, decimalPlaces) {
+  return math.round(number, decimalPlaces);
+}
 
 function calculateMonthlyReturns(priceData) {
   return priceData.map((prices) => {
@@ -11,7 +16,7 @@ function calculateMonthlyReturns(priceData) {
 
       if (!currentPrice || !previousPrice) return null;
 
-      return (currentPrice / previousPrice) - 1;
+      return roundToDecimal(math.number(math.subtract(math.divide(currentPrice, previousPrice), 1)), 10);
     });
   });
 }
@@ -22,18 +27,18 @@ function calculateAverageMonthlyReturns(returns) {
   const countPerMonth = [];
 
   for (let monthIndex = 0; monthIndex < numMonths; monthIndex++) {
-    let sum = 0;
+    let sum = math.bignumber(0);
     let count = 0;
 
     for (let ri = 0; ri < returns.length; ri++) {
       const returnValue = returns[ri][monthIndex];
       if (returnValue !== null) {
-        sum += returnValue;
+        sum = math.add(sum, math.bignumber(returnValue));
         count++;
       }
     }
 
-    averageReturns.push(count > 0 ? sum / count : null);
+    averageReturns.push(count > 0 ? math.number(math.divide(sum, count)) : null);
     countPerMonth.push(count);
   }
 
@@ -46,15 +51,16 @@ function calculateCumulativeReturns(returns) {
   const cumulativeReturns = new Array(numCompanies).fill(null).map(() => new Array(numMonths).fill(null));
 
   for (let ri = 0; ri < numCompanies; ri++) {
-    let cumulativeReturn = 1; // Start with 1 (100%)
+    let cumulativeReturn = math.bignumber(1); // Start with 1 (100%)
 
     for (let monthIndex = 0; monthIndex < numMonths; monthIndex++) {
       const currentReturn = returns[ri][monthIndex];
       if (currentReturn === null) {
         cumulativeReturns[ri][monthIndex] = null;
       } else {
-        cumulativeReturn *= (1 + currentReturn);
-        cumulativeReturns[ri][monthIndex] = cumulativeReturn - 1; // Convert back to percentage
+        cumulativeReturn = math.multiply(cumulativeReturn, math.add(1, math.bignumber(currentReturn)));
+        // Round to 10 decimal places to ensure consistent precision
+        cumulativeReturns[ri][monthIndex] = roundToDecimal(math.number(math.subtract(cumulativeReturn, 1)), 10);
       }
     }
   }
@@ -67,19 +73,9 @@ function calculateAbnormalReturns(shareReturns, indexReturns) {
     row.map((returnValue, monthIndex) => {
       const indexReturnValue = indexReturns[ri][monthIndex];
       if (returnValue === null || indexReturnValue === null) return null;
-      return returnValue - indexReturnValue;
+      return math.number(math.subtract(math.bignumber(returnValue), math.bignumber(indexReturnValue)));
     })
   );
-}
-
-const calculateReturns = (sharePriceData, indexPriceData) => {
-  const shareMonthlyReturns = calculateMonthlyReturns(sharePriceData);
-  const indexMonthlyReturns = calculateMonthlyReturns(indexPriceData);
-
-  const monthlyAbnormalReturns = calculateAbnormalReturns(shareMonthlyReturns, indexMonthlyReturns);
-  const cumulativeAbnormalReturns = calculateCumulativeReturns(monthlyAbnormalReturns);
-
-  return calculateAverageMonthlyReturns(cumulativeAbnormalReturns);
 }
 
 export const analyzeData = (companyData, sharePriceData, indexPriceData) => {
@@ -102,3 +98,15 @@ export const analyzeData = (companyData, sharePriceData, indexPriceData) => {
 
   return calculateReturns(filteredSharePriceData, filteredIndexPriceData);
 }
+
+function calculateReturns(sharePriceData, indexPriceData) {
+  const shareMonthlyReturns = calculateMonthlyReturns(sharePriceData);
+  const indexMonthlyReturns = calculateMonthlyReturns(indexPriceData);
+
+  const monthlyAbnormalReturns = calculateAbnormalReturns(shareMonthlyReturns, indexMonthlyReturns);
+  const cumulativeAbnormalReturns = calculateCumulativeReturns(monthlyAbnormalReturns);
+
+  return calculateAverageMonthlyReturns(cumulativeAbnormalReturns);
+}
+
+export { calculateMonthlyReturns, calculateAverageMonthlyReturns, calculateCumulativeReturns, calculateAbnormalReturns };
