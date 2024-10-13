@@ -1,8 +1,13 @@
 {
   "name": "stock-research-analyzer",
+  "type": "module",
   "dependencies": {
     "axios": "^1.7.7",
     "csv-parse": "^5.5.6",
-    "csv-writer": "^1.6.0"
+    "csv-writer": "^1.6.0",
+    "dayjs": "^1.11.13"
+  },
+  "scripts": {
+    "acquisitions:us": "node ./src/acquisitions/index.js ./data/acquisitions/us/data.csv ./data/acquisitions/us/acquirerSharePrices.csv ./data/acquisitions/us/acquirerSPXIndexPrices.csv"
   }
 }
