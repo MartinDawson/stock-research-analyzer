@@ -78,21 +78,6 @@ function calculateAbnormalReturns(shareReturns, indexReturns) {
   );
 }
 
-export const analyzeData = (companyData, sharePriceData, indexPriceData) => {
-  const [minDate, maxDate] = companyData.reduce((acc, data) => {
-    const currentDate = dayjs(data.announcedDate);
-    return [
-      currentDate.isBefore(acc[0]) ? currentDate : acc[0],
-      currentDate.isAfter(acc[1]) ? currentDate : acc[1]
-    ];
-  }, [dayjs(companyData[0].announcedDate), dayjs(companyData[0].announcedDate)]);
-
-  console.log(`Date Range: ${minDate.format('DD/MM/YYYY')} - ${maxDate.format('DD/MM/YYYY')}`);
-  console.log('Total count of data:', sharePriceData.length);
-
-  return calculateReturns(sharePriceData, indexPriceData);
-}
-
 function calculateReturns(sharePriceData, indexPriceData) {
   const shareMonthlyReturns = calculateMonthlyReturns(sharePriceData);
   const indexMonthlyReturns = calculateMonthlyReturns(indexPriceData);
@@ -103,4 +88,4 @@ function calculateReturns(sharePriceData, indexPriceData) {
   return calculateAverageMonthlyReturns(cumulativeAbnormalReturns);
 }
 
-export { calculateMonthlyReturns, calculateAverageMonthlyReturns, calculateCumulativeReturns, calculateAbnormalReturns };
+export { calculateReturns, calculateMonthlyReturns, calculateAverageMonthlyReturns, calculateCumulativeReturns, calculateAbnormalReturns };

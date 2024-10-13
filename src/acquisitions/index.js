@@ -2,8 +2,9 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import { convertAndFilterPriceData } from '../cleanData.js';
 import { processAcquisitionData } from './processData.js';
+import { runOnChunkedThreads } from '../main.js';
 import { extractColumnHeaderAndData, processTimeseriesData } from '../data.js';
-import { getFunctionsToAnalyze } from './analyzeData.js';
+import { acquisitionConditions } from './acquisitionConditions.js';
 
 dayjs.extend(customParseFormat);
 
@@ -29,11 +30,18 @@ const main = async () => {
 
   const convertedSharePriceData = convertAndFilterPriceData(newSharePriceData);
   const convertedIndexPriceData = convertAndFilterPriceData(newIndexPriceData);
-  const functionsToAnalyze = getFunctionsToAnalyze(companyData, convertedSharePriceData, convertedIndexPriceData)
 
-  functionsToAnalyze.forEach(({ label, func }) => {
-    const [avgCumulativeAbnormalReturns, countPerMonth] = func();
+  const results = await runOnChunkedThreads(
+    './src/acquisitions/analyzeDataWorker.js',
+    acquisitionConditions,
+    { companyData, convertedSharePriceData, convertedIndexPriceData }
+  );
+
+  results.forEach(({ label, data, dataCount }) => {
+    const [avgCumulativeAbnormalReturns, countPerMonth] = data;
     const month0Value = avgCumulativeAbnormalReturns[5];
+
+    console.log('Total count of data:', dataCount);
 
     const tableData = avgCumulativeAbnormalReturns.map((returnValue, index) => ({
       Month: timeSeriesHeader[index],
