@@ -33,7 +33,6 @@ const main = async () => {
 
   functionsToAnalyze.forEach(({ label, func }) => {
     const [avgCumulativeAbnormalReturns, countPerMonth] = func();
-
     const month0Value = avgCumulativeAbnormalReturns[5];
 
     const tableData = avgCumulativeAbnormalReturns.map((returnValue, index) => ({
