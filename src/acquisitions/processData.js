@@ -34,6 +34,7 @@ export const processAcquisitionData = async (inputFile) => {
       isWithdrawn: row['Transaction Status'] === 'Terminated/Withdrawn',
       dealTypes: getAcquisitionTypes(row['M&A Feature Type']),
       isMinorityAcquisition: row['Transaction Type'] === 'M&A - Minority',
+      transactionSize: row['Total Transaction Value ($M)'],
       buyer: {
         name: row['SPCIQ ID (Buyer/Investor)'],
         marketValue: buyerMarketValue,
@@ -46,7 +47,6 @@ export const processAcquisitionData = async (inputFile) => {
         isPublicCompany: sellerMarketValue !== 0,
         identifier: extractId(row['SPCIQ ID (Seller)'])
       },
-      transactionSizeRelativeToBuyerMarketCap: row['Total Transaction Value ($M)'] / buyerMarketValue,
     };
   });
 

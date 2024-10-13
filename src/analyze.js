@@ -79,7 +79,7 @@ function calculateAbnormalReturns(shareReturns, indexReturns) {
 
 function calculateReturns(sharePriceData, indexPriceData) {
   if (sharePriceData.length === 0 || indexPriceData.length === 0) {
-    return [];
+    return [[], []];
   }
 
   const shareMonthlyReturns = calculateMonthlyReturns(sharePriceData);
