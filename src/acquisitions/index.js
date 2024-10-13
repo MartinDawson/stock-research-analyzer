@@ -1,11 +1,13 @@
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import { convertAndFilterPriceData } from '../cleanData.js';
-import { processData, processTimeseriesData } from './processData.js';
-import { analyzeData } from './analyze.js';
-import { extractColumnHeaderAndData } from '../data.js';
+import { processAcquisitionData } from './processData.js';
+import { extractColumnHeaderAndData, processTimeseriesData } from '../data.js';
+import { getFunctionsToAnalyze } from './analyzeData.js';
 
 dayjs.extend(customParseFormat);
+
+const cols = 35;
 
 function checkArrayLengths(companyData, sharePriceData, indexPriceData) {
   if (companyData.length !== sharePriceData.length
@@ -16,9 +18,9 @@ function checkArrayLengths(companyData, sharePriceData, indexPriceData) {
 }
 
 const main = async () => {
-  const companyData = await processData(process.argv[2]);
-  const sharePriceData = await processTimeseriesData(process.argv[3])
-  const indexPriceData = await processTimeseriesData(process.argv[4])
+  const companyData = await processAcquisitionData(process.argv[2]);
+  const sharePriceData = await processTimeseriesData(process.argv[3], cols)
+  const indexPriceData = await processTimeseriesData(process.argv[4], cols)
 
   const [timeSeriesHeader, newSharePriceData] = extractColumnHeaderAndData(sharePriceData);
   const [_, newIndexPriceData] = extractColumnHeaderAndData(indexPriceData);
@@ -27,21 +29,25 @@ const main = async () => {
 
   const convertedSharePriceData = convertAndFilterPriceData(newSharePriceData);
   const convertedIndexPriceData = convertAndFilterPriceData(newIndexPriceData);
+  const functionsToAnalyze = getFunctionsToAnalyze(companyData, convertedSharePriceData, convertedIndexPriceData)
 
-  // Filter out minority acquisitions
-  // const filteredData = companyData.filter(data => !data.isMinorityAcquisition);
+  functionsToAnalyze.forEach(({ label, func }) => {
+    const [avgCumulativeAbnormalReturns, countPerMonth] = func();
 
-  const [avgCumulativeAbnormalReturns, countPerMonth] = analyzeData(companyData, convertedSharePriceData, convertedIndexPriceData);
+    const month0Value = avgCumulativeAbnormalReturns[5];
 
-  const tableData = avgCumulativeAbnormalReturns.map((returnValue, index) => ({
-    Month: timeSeriesHeader[index],
-    Count: countPerMonth[index],
-    'Avg Cumulative Abnormal Return': returnValue !== null
-      ? `${(returnValue * 100).toFixed(2)}%`
-      : 'N/A'
-  }));
+    const tableData = avgCumulativeAbnormalReturns.map((returnValue, index) => ({
+      Month: timeSeriesHeader[index],
+      Count: countPerMonth[index],
+      'Avg Cumulative Abnormal Return': returnValue !== null
+        ? `${(returnValue * 100).toFixed(2)}%`
+        : 'N/A',
+      'Max Drawdown Since Acquisition Announcement': index >= 5 ? `${((returnValue - month0Value) * 100).toFixed(2)}%` : 'N/A',
+    }));
 
-  console.table(tableData);
+    console.log(label);
+    console.table(tableData);
+  });
 };
 
 main();

@@ -88,15 +88,9 @@ export const analyzeData = (companyData, sharePriceData, indexPriceData) => {
   }, [dayjs(companyData[0].announcedDate), dayjs(companyData[0].announcedDate)]);
 
   console.log(`Date Range: ${minDate.format('DD/MM/YYYY')} - ${maxDate.format('DD/MM/YYYY')}`);
+  console.log('Total count of data:', sharePriceData.length);
 
-  const isMajorityAcquisitionPredicate = (_, i) => !companyData[i].isMinorityAcquisition
-
-  const filteredSharePriceData = sharePriceData.filter(isMajorityAcquisitionPredicate);
-  const filteredIndexPriceData = indexPriceData.filter(isMajorityAcquisitionPredicate);
-
-  console.log('Total count of data:', filteredSharePriceData.length);
-
-  return calculateReturns(filteredSharePriceData, filteredIndexPriceData);
+  return calculateReturns(sharePriceData, indexPriceData);
 }
 
 function calculateReturns(sharePriceData, indexPriceData) {

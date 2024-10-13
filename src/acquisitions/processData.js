@@ -37,21 +37,17 @@ const extractId = (field) => {
   return match ? match[0] : null;
 };
 
-export const processData = async (inputFile) => {
+export const processAcquisitionData = async (inputFile) => {
   const fileContent = await fs.readFile(inputFile, 'utf8');
   const records = parse(fileContent, {
     columns: true
   });
 
   const mappedRecords = records.map(row => {
-    // const announcedDate = dayjs(row['Announced Date MM/dd/yyyy'], 'DD/MM/YYYY');
     const buyerMarketValue = 0;
     const sellerMarketValue = 0;
-    // const dateFormat = 'YYYY-MM-DD'
 
     return {
-      // startDate: announcedDate.subtract(5, 'month').format(dateFormat),
-      // endDate: announcedDate.add(30, 'month').format(dateFormat),
       announcedDate: dayjs(row['Announced Date MM/dd/yyyy'], 'DD/MM/YYYY').toDate(),
       transactionStatus: row['Transaction Status'],
       type: getAcquisitionTypes(row['M&A Feature Type']),
@@ -93,14 +89,4 @@ export const processData = async (inputFile) => {
 
   return addCountOfTransactionsPerBuyer(mappedRecords);
 };
-
-export const processTimeseriesData = async (inputFile) => {
-  const fileContent = await fs.readFile(inputFile, 'utf8');
-  const records = parse(fileContent, {
-    cast: true,
-  });
-  const slicedRecords = records.map(row => row.slice(0, 35));
-
-  return slicedRecords;
-}
 
