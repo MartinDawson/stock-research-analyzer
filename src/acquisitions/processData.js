@@ -1,34 +1,16 @@
 import dayjs from 'dayjs';
 import fs from 'fs/promises';
 import { parse } from 'csv-parse/sync';
+import { acquisitionDealTypes } from './acquisitionConditions.js';
 
 function getAcquisitionTypes(data) {
-  const types = [
-    "New Shareholder Gaining Majority Control",
-    "Cash Deal",
-    "Stock Deal",
-    "Earnout Payment",
-    "Cross-Border",
-    "Terms Not Disclosed",
-    "Leveraged Buyout (LBO)",
-    "Reverse Merger",
-    "Backdoor IPO",
-    "Corporate Divestiture",
-    "Management Participated",
-    "Bankruptcy Sale",
-    "Add-on/Bolt-on/Consolidation/Tuck-in",
-    "Minority Shareholder Increasing Ownership Stake",
-    "Minority Shareholder Gaining Majority Control",
-    "Tender Offer"
-  ];
-
-  const findType = (type) => {
-    const index = data.indexOf(type);
+  const findType = ({ label, type }) => {
+    const index = data.indexOf(label);
 
     return index !== -1 ? type : null;
   };
 
-  return types.map(findType).filter(Boolean);
+  return acquisitionDealTypes.map(findType).filter(Boolean);
 }
 
 const extractId = (field) => {
@@ -49,8 +31,8 @@ export const processAcquisitionData = async (inputFile) => {
 
     return {
       announcedDate: dayjs(row['Announced Date MM/dd/yyyy'], 'DD/MM/YYYY').toDate(),
-      transactionStatus: row['Transaction Status'],
-      type: getAcquisitionTypes(row['M&A Feature Type']),
+      isWithdrawn: row['Transaction Status'] === 'Terminated/Withdrawn',
+      dealTypes: getAcquisitionTypes(row['M&A Feature Type']),
       isMinorityAcquisition: row['Transaction Type'] === 'M&A - Minority',
       buyer: {
         name: row['SPCIQ ID (Buyer/Investor)'],

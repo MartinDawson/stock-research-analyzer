@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import * as math from 'mathjs';
 
 function roundToDecimal(number, decimalPlaces) {
@@ -79,6 +78,10 @@ function calculateAbnormalReturns(shareReturns, indexReturns) {
 }
 
 function calculateReturns(sharePriceData, indexPriceData) {
+  if (sharePriceData.length === 0 || indexPriceData.length === 0) {
+    return [];
+  }
+
   const shareMonthlyReturns = calculateMonthlyReturns(sharePriceData);
   const indexMonthlyReturns = calculateMonthlyReturns(indexPriceData);
 
