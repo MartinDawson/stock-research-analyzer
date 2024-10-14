@@ -107,7 +107,7 @@ export const getFilterSharePriceIndexData = (companyData, sharePriceData, indexP
 
     const isInDateRange = company => {
       const announcedDate = new Date(company.announcedDate);
-      return announcedDate > new Date(dateRange.start) && announcedDate < new Date(dateRange.end);
+      return announcedDate >= new Date(dateRange.start) && announcedDate <= new Date(dateRange.end);
     };
 
     const isCorrectAcquisitionType = (company) => {
