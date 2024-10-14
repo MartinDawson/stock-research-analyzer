@@ -49,7 +49,7 @@ const main = async () => {
   );
 
   const allData = processCalculationResults(calculationResults, timeSeriesHeader, args.outputTopNumberCount);
-  const filePath = './data/out/all_data.json';
+  const filePath = './data/output/acquisitions/all_data.json';
 
   const options = new FracturedJsonOptions();
 
