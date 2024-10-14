@@ -1,70 +1,45 @@
-import * as math from 'mathjs';
-
 function roundToDecimal(number, decimalPlaces) {
-  return math.round(number, decimalPlaces);
+  const factor = Math.pow(10, decimalPlaces);
+  return Math.round(number * factor) / factor;
 }
 
 function calculateMonthlyReturns(priceData) {
-  return priceData.map((prices) => {
-    return prices.map((currentPrice, monthIndex) => {
-      if (monthIndex === 0) {
-        return null;
+  return priceData.map(prices => {
+    const returns = new Array(prices.length);
+    returns[0] = null;
+    for (let i = 1; i < prices.length; i++) {
+      if (!prices[i] || !prices[i - 1]) {
+        returns[i] = null;
+      } else {
+        returns[i] = roundToDecimal(prices[i] / prices[i - 1] - 1, 10);
       }
-
-      const previousPrice = prices[monthIndex - 1];
-
-      if (!currentPrice || !previousPrice) return null;
-
-      return roundToDecimal(math.number(math.subtract(math.divide(currentPrice, previousPrice), 1)), 10);
-    });
+    }
+    return returns;
   });
 }
 
 function calculateAverageMonthlyReturns(returns) {
   const numMonths = returns[0].length;
-  const averageReturns = [];
-  const countPerMonth = [];
+  const averageReturns = new Array(numMonths);
+  const countPerMonth = new Array(numMonths);
 
   for (let monthIndex = 0; monthIndex < numMonths; monthIndex++) {
-    let sum = math.bignumber(0);
+    let sum = 0;
     let count = 0;
 
     for (let ri = 0; ri < returns.length; ri++) {
       const returnValue = returns[ri][monthIndex];
       if (returnValue !== null) {
-        sum = math.add(sum, math.bignumber(returnValue));
+        sum += returnValue;
         count++;
       }
     }
 
-    averageReturns.push(count > 0 ? math.number(math.divide(sum, count)) : null);
-    countPerMonth.push(count);
+    averageReturns[monthIndex] = count > 0 ? roundToDecimal(sum / count, 10) : null;
+    countPerMonth[monthIndex] = count;
   }
 
   return [averageReturns, countPerMonth];
-}
-
-function calculateCumulativeReturns(returns) {
-  const numCompanies = returns.length;
-  const numMonths = returns[0].length;
-  const cumulativeReturns = new Array(numCompanies).fill(null).map(() => new Array(numMonths).fill(null));
-
-  for (let ri = 0; ri < numCompanies; ri++) {
-    let cumulativeReturn = math.bignumber(1); // Start with 1 (100%)
-
-    for (let monthIndex = 0; monthIndex < numMonths; monthIndex++) {
-      const currentReturn = returns[ri][monthIndex];
-      if (currentReturn === null) {
-        cumulativeReturns[ri][monthIndex] = null;
-      } else {
-        cumulativeReturn = math.multiply(cumulativeReturn, math.add(1, math.bignumber(currentReturn)));
-        // Round to 10 decimal places to ensure consistent precision
-        cumulativeReturns[ri][monthIndex] = roundToDecimal(math.number(math.subtract(cumulativeReturn, 1)), 10);
-      }
-    }
-  }
-
-  return cumulativeReturns;
 }
 
 function calculateAbnormalReturns(shareReturns, indexReturns) {
@@ -72,9 +47,33 @@ function calculateAbnormalReturns(shareReturns, indexReturns) {
     row.map((returnValue, monthIndex) => {
       const indexReturnValue = indexReturns[ri][monthIndex];
       if (returnValue === null || indexReturnValue === null) return null;
-      return math.number(math.subtract(math.bignumber(returnValue), math.bignumber(indexReturnValue)));
+      return roundToDecimal(returnValue - indexReturnValue, 10);
     })
   );
+}
+
+
+function calculateCumulativeReturns(returns) {
+  const numCompanies = returns.length;
+  const numMonths = returns[0].length;
+  const cumulativeReturns = new Array(numCompanies);
+
+  for (let ri = 0; ri < numCompanies; ri++) {
+    let cumulativeReturn = 1;
+    cumulativeReturns[ri] = new Array(numMonths);
+
+    for (let monthIndex = 0; monthIndex < numMonths; monthIndex++) {
+      const currentReturn = returns[ri][monthIndex];
+      if (currentReturn === null) {
+        cumulativeReturns[ri][monthIndex] = null;
+      } else {
+        cumulativeReturn *= (1 + currentReturn);
+        cumulativeReturns[ri][monthIndex] = roundToDecimal(cumulativeReturn - 1, 10);
+      }
+    }
+  }
+
+  return cumulativeReturns;
 }
 
 function calculateReturns(sharePriceData, indexPriceData) {

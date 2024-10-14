@@ -1,16 +1,19 @@
+import fs from 'fs/promises';
 import dayjs from 'dayjs';
+import { Formatter, FracturedJsonOptions } from 'fracturedjsonjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
-import { convertAndFilterPriceData } from '../cleanData.js';
+import { convertAndFilterOutBadPriceData } from '../cleanData.js';
 import { processAcquisitionData } from './processData.js';
 import { runOnChunkedThreads } from '../main.js';
 import { extractColumnHeaderAndData, processTimeseriesData } from '../data.js';
-import { acquisitionConditions } from './acquisitionConditions.js';
+import { acquisitionLabelFilters } from './acquisitionFilters.js';
+import { processCalculationResults } from './outputData.js';
 
 dayjs.extend(customParseFormat);
 
 const cols = 35;
 
-function checkArrayLengths(companyData, sharePriceData, indexPriceData) {
+const checkArrayLengths = (companyData, sharePriceData, indexPriceData) => {
   if (companyData.length !== sharePriceData.length
     || companyData.length !== indexPriceData.length
     || sharePriceData.length !== indexPriceData.length) {
@@ -19,7 +22,8 @@ function checkArrayLengths(companyData, sharePriceData, indexPriceData) {
 }
 
 const main = async () => {
-  const companyData = await processAcquisitionData(process.argv[2]);
+  const fileContent = await fs.readFile(process.argv[2], 'utf8');
+  const companyData = await processAcquisitionData(fileContent);
   const sharePriceData = await processTimeseriesData(process.argv[3], cols)
   const indexPriceData = await processTimeseriesData(process.argv[4], cols)
 
@@ -28,33 +32,37 @@ const main = async () => {
 
   checkArrayLengths(companyData, newSharePriceData, newIndexPriceData);
 
-  const convertedSharePriceData = convertAndFilterPriceData(newSharePriceData);
-  const convertedIndexPriceData = convertAndFilterPriceData(newIndexPriceData);
+  const convertedSharePriceData = convertAndFilterOutBadPriceData(newSharePriceData);
+  const convertedIndexPriceData = convertAndFilterOutBadPriceData(newIndexPriceData);
 
-  const results = await runOnChunkedThreads(
-    './src/acquisitions/analyzeDataWorker.js',
-    acquisitionConditions,
-    { companyData, convertedSharePriceData, convertedIndexPriceData }
+  const filterResults = await runOnChunkedThreads(
+    './src/acquisitions/workers/calculateFilteredPrices.js',
+    acquisitionLabelFilters,
+    { companyData, sharePriceData: convertedSharePriceData, indexPriceData: convertedIndexPriceData }
   );
 
-  results.forEach(({ label, data, dataCount }) => {
-    const [avgCumulativeAbnormalReturns, countPerMonth] = data;
-    const month0Value = avgCumulativeAbnormalReturns[5];
+  const calculationResults = await runOnChunkedThreads(
+    './src/acquisitions/workers/calculateReturns.js',
+    filterResults,
+  );
 
-    console.log('Total count of data:', dataCount);
+  const allData = processCalculationResults(calculationResults, timeSeriesHeader);
+  const filePath = './data/out/all_data.json';
 
-    const tableData = avgCumulativeAbnormalReturns.map((returnValue, index) => ({
-      Month: timeSeriesHeader[index],
-      Count: countPerMonth[index],
-      'Avg Cumulative Abnormal Return': returnValue !== null
-        ? `${(returnValue * 100).toFixed(2)}%`
-        : 'N/A',
-      'Max Drawdown Since Acquisition Announcement': index >= 5 ? `${((returnValue - month0Value) * 100).toFixed(2)}%` : 'N/A',
-    }));
+  const options = new FracturedJsonOptions();
 
-    console.log(label);
-    console.table(tableData);
-  });
+  options.MaxTotalLineLength = 120;
+  options.MaxInlineComplexity = Infinity; // This should keep arrays on one line
+
+  const formatter = new Formatter();
+
+  formatter.Options = options;
+
+  const jsonString = formatter.Serialize(allData);
+
+  await fs.writeFile(filePath, jsonString);
+
+  console.log(`Data has been written to ${filePath}`);
 };
 
 main();

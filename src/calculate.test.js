@@ -4,7 +4,7 @@ import {
   calculateAverageMonthlyReturns,
   calculateCumulativeReturns,
   calculateAbnormalReturns
-} from './analyze.js';
+} from './calculate.js';
 
 function expectNumbersClose(received, expected, precision = 10) {
   const delta = Math.pow(10, -precision);
@@ -15,7 +15,7 @@ function expectNumbersClose(received, expected, precision = 10) {
   expect(pass).toBe(true);
 }
 
-describe('analyze.js', () => {
+describe('calculate.js', () => {
   describe('calculateMonthlyReturns', () => {
     it('should calculate monthly returns correctly', () => {
       const priceData = [[100, 110, 105, 115]];

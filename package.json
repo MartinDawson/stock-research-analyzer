@@ -6,7 +6,7 @@
     "csv-parse": "^5.5.6",
     "csv-writer": "^1.6.0",
     "dayjs": "^1.11.13",
-    "mathjs": "^13.2.0"
+    "fracturedjsonjs": "^4.0.2"
   },
   "scripts": {
     "test": "vitest",

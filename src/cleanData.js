@@ -54,7 +54,7 @@ const convertBadPriceData = (records) => {
   });
 };
 
-export const convertAndFilterPriceData = (records) => {
+export const convertAndFilterOutBadPriceData = (records) => {
   const convertedData = convertEmptyData(records)
   const filteredData = convertBadPriceData(convertedData);
 

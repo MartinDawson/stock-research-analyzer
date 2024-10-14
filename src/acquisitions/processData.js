@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
-import fs from 'fs/promises';
 import { parse } from 'csv-parse/sync';
-import { acquisitionDealTypes } from './acquisitionConditions.js';
+import { acquisitionDealTypes } from './acquisitionFilters.js';
 
 function getAcquisitionTypes(data) {
   const findType = ({ label, type }) => {
@@ -19,8 +18,7 @@ const extractId = (field) => {
   return match ? match[0] : null;
 };
 
-export const processAcquisitionData = async (inputFile) => {
-  const fileContent = await fs.readFile(inputFile, 'utf8');
+export const processAcquisitionData = (fileContent) => {
   const records = parse(fileContent, {
     columns: true
   });
