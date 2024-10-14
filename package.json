@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "vitest",
-    "acquisitions:us": "node ./src/acquisitions/index.js ./data/acquisitions/us/data.csv ./data/acquisitions/us/acquirerSharePrices.csv ./data/acquisitions/us/acquirerSPXIndexPrices.csv"
+    "analyze:acquisitions:us": "node ./src/acquisitions/index.js ./data/acquisitions/us/data.csv ./data/acquisitions/us/acquirerSharePrices.csv ./data/acquisitions/us/acquirerSPXIndexPrices.csv --outputTopNumberCount 30 --minMarketCapForAnalyzingInM 10 --minAmountOfCompaniesInEachSampleSize 500"
   },
   "devDependencies": {
     "vitest": "^2.1.2"

@@ -1,5 +1,3 @@
-const topNumberCount = 10;
-
 function createConsolidatedReturns(label, avgCumulativeAbnormalReturns, countPerMonth, timeSeriesHeader) {
   const month0Value = avgCumulativeAbnormalReturns[5];
 
@@ -41,7 +39,7 @@ function getTopReturns(returns, count, metric, ascending = true) {
   return sortedReturns.slice(0, count);
 }
 
-export function processCalculationResults(calculationResults, timeSeriesHeader) {
+export function processCalculationResults(calculationResults, timeSeriesHeader, outputTopNumberCount) {
   const returns = calculationResults.map(({ label, data }) => {
     const [avgCumulativeAbnormalReturns, countPerMonth] = data;
     return createConsolidatedReturns(label, avgCumulativeAbnormalReturns, countPerMonth, timeSeriesHeader);
@@ -49,9 +47,9 @@ export function processCalculationResults(calculationResults, timeSeriesHeader) 
 
   return {
     allReturns: returns,
-    worstReturnsSinceAcquisition: getTopReturns(returns, topNumberCount, 'lastMonthSinceAcquisition', true),
-    bestReturnsSinceAcquisition: getTopReturns(returns, topNumberCount, 'lastMonthSinceAcquisition', false),
-    worstDrawdowns: getTopReturns(returns, topNumberCount, 'drawdown', true),
-    bestPeaks: getTopReturns(returns, topNumberCount, 'peak', false)
+    worstReturnsSinceAcquisition: getTopReturns(returns, outputTopNumberCount, 'lastMonthSinceAcquisition', true),
+    bestReturnsSinceAcquisition: getTopReturns(returns, outputTopNumberCount, 'lastMonthSinceAcquisition', false),
+    worstDrawdowns: getTopReturns(returns, outputTopNumberCount, 'drawdown', true),
+    bestPeaks: getTopReturns(returns, outputTopNumberCount, 'peak', false)
   };
 }

@@ -54,9 +54,24 @@ const convertBadPriceData = (records) => {
   });
 };
 
-export const convertAndFilterOutBadPriceData = (records) => {
-  const convertedData = convertEmptyData(records)
-  const filteredData = convertBadPriceData(convertedData);
+export const filterOutCompaniesAndPricesWhereMarketCapIsTooSmall = (companyData, sharePriceData, indexPriceData, minMarketCapForAnalyzingInM) => {
+  const filteredIndices = companyData.reduce((indices, company, index) => {
+    if (company.buyer.marketValue !== null && company.buyer.marketValue >= minMarketCapForAnalyzingInM) {
+      indices.push(index);
+    }
+    return indices;
+  }, []);
 
-  return filteredData;
+  const filteredCompanyData = filteredIndices.map(index => companyData[index]);
+  const filteredSharePriceData = filteredIndices.map(index => sharePriceData[index]);
+  const filteredIndexPriceData = filteredIndices.map(index => indexPriceData[index]);
+
+  return [filteredCompanyData, filteredSharePriceData, filteredIndexPriceData];
+}
+
+export const convertBadPriceDataToNull = (records) => {
+  const convertedNonEmptyData = convertEmptyData(records)
+  const convertedData = convertBadPriceData(convertedNonEmptyData);
+
+  return convertedData;
 }
