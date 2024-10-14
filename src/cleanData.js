@@ -23,7 +23,7 @@ const convertEmptyData = (records) => {
   });
 };
 
-const convertBadData = (records) => {
+const convertBadPriceData = (records) => {
   checkIfDataIsValid(records);
 
   return records.map((row) => {
@@ -56,7 +56,7 @@ const convertBadData = (records) => {
 
 export const convertAndFilterPriceData = (records) => {
   const convertedData = convertEmptyData(records)
-  const filteredData = convertBadData(convertedData);
+  const filteredData = convertBadPriceData(convertedData);
 
   return filteredData;
 }

@@ -35,34 +35,34 @@ const acquisitionPublicOrPrivate = [
   { label: 'Private', type: 'private' },
 ];
 
-// TODO: what to do about ridicilously small (<0%) & large transaction size relative to buyer? Remove from source data?
 const acquisitionSizeByTransactionValue = [
   { label: 'All Transaction sizes', type: 'all' },
   { label: '0-2%', type: '0-2%' },
   { label: '2-10%', type: '2-10%' },
   { label: '10-20%', type: '10-25%' },
   { label: '25-50%', type: '25-50%' },
-  { label: '>50%', type: '>50%' },
+  { label: '50-100%', type: '50-100%' },
+  { label: '>100%', type: '>100%' },
 ];
 
 export const acquisitionDealTypes = [
   { label: "All Deal Types", type: "all" },
-  // { label: "New Shareholder Gaining Majority Control", type: "newShareholderMajority" },
-  // { label: "Cash Deal", type: "cashDeal" },
-  // { label: "Stock Deal", type: "stockDeal" },
-  // { label: "Earnout Payment", type: "earnoutPayment" },
-  // { label: "Cross-Border", type: "crossBorder" },
-  // { label: "Terms Not Disclosed", type: "termsNotDisclosed" },
-  // { label: "Leveraged Buyout (LBO)", type: "lbo" },
-  // { label: "Reverse Merger", type: "reverseMerger" },
-  // { label: "Backdoor IPO", type: "backdoorIpo" },
-  // { label: "Corporate Divestiture", type: "corporateDivestiture" },
-  // { label: "Management Participated", type: "managementParticipated" },
-  // { label: "Bankruptcy Sale", type: "bankruptcySale" },
-  // { label: "Add-on/Bolt-on/Consolidation/Tuck-in", type: "addOn" },
-  // { label: "Minority Shareholder Increasing Ownership Stake", type: "minorityIncreasingStake" },
-  // { label: "Minority Shareholder Gaining Majority Control", type: "minorityGainingMajority" },
-  // { label: "Tender Offer", type: "tenderOffer" }
+  { label: "New Shareholder Gaining Majority Control", type: "newShareholderMajority" },
+  { label: "Cash Deal", type: "cashDeal" },
+  { label: "Stock Deal", type: "stockDeal" },
+  { label: "Earnout Payment", type: "earnoutPayment" },
+  { label: "Cross-Border", type: "crossBorder" },
+  { label: "Terms Not Disclosed", type: "termsNotDisclosed" },
+  { label: "Leveraged Buyout (LBO)", type: "lbo" },
+  { label: "Reverse Merger", type: "reverseMerger" },
+  { label: "Backdoor IPO", type: "backdoorIpo" },
+  { label: "Corporate Divestiture", type: "corporateDivestiture" },
+  { label: "Management Participated", type: "managementParticipated" },
+  { label: "Bankruptcy Sale", type: "bankruptcySale" },
+  { label: "Add-on/Bolt-on/Consolidation/Tuck-in", type: "addOn" },
+  { label: "Minority Shareholder Increasing Ownership Stake", type: "minorityIncreasingStake" },
+  { label: "Minority Shareholder Gaining Majority Control", type: "minorityGainingMajority" },
+  { label: "Tender Offer", type: "tenderOffer" }
 ];
 
 export const acquisitionConditions = dateRanges.flatMap(dateRange =>

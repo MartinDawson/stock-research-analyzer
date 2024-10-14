@@ -26,49 +26,30 @@ export const processAcquisitionData = async (inputFile) => {
   });
 
   const mappedRecords = records.map(row => {
-    const buyerMarketValue = 0;
-    const sellerMarketValue = 0;
+    const buyerMarketValue = row['Buyer: Market Capitalization ($M)'] === '0' ? null : parseFloat(row['Buyer: Market Capitalization ($M)']);
+    const sellerMarketValue = row['Target: Market Capitalization ($M)'] === 'NA' ? null : parseFloat(row['Target: Market Capitalization ($M)']);
+    const transactionSize = row['Total Transaction Value ($M)'] === 'NA' ? null : parseFloat(row['Total Transaction Value ($M)']);
 
     return {
       announcedDate: dayjs(row['Announced Date MM/dd/yyyy'], 'DD/MM/YYYY').toDate(),
       isWithdrawn: row['Transaction Status'] === 'Terminated/Withdrawn',
       dealTypes: getAcquisitionTypes(row['M&A Feature Type']),
       isMinorityAcquisition: row['Transaction Type'] === 'M&A - Minority',
-      transactionSize: row['Total Transaction Value ($M)'],
+      transactionSize,
       buyer: {
         name: row['SPCIQ ID (Buyer/Investor)'],
         marketValue: buyerMarketValue,
-        isPublicCompany: buyerMarketValue !== 0,
         identifier: extractId(row['SPCIQ ID (Buyer/Investor)'])
       },
       seller: {
-        name: row['SPCIQ ID (Seller)'],
+        name: row['SPCIQ ID (Target/Issuer)'],
         marketValue: sellerMarketValue,
-        isPublicCompany: sellerMarketValue !== 0,
-        identifier: extractId(row['SPCIQ ID (Seller)'])
+        isPublicCompany: sellerMarketValue !== null,
+        identifier: extractId(row['SPCIQ ID (Target/Issuer)'])
       },
     };
   });
 
-  const addCountOfTransactionsPerBuyer = (records) => {
-    const transactionCounts = {};
-
-    records.forEach(record => {
-      const buyerId = record.buyer.identifier;
-
-      if (buyerId in transactionCounts) {
-        transactionCounts[buyerId] += 1;
-      } else {
-        transactionCounts[buyerId] = 1;
-      }
-    });
-
-    return records.map(record => ({
-      ...record,
-      transactionCount: transactionCounts[record.buyer.identifier]
-    }));
-  };
-
-  return addCountOfTransactionsPerBuyer(mappedRecords);
+  return mappedRecords;
 };
 

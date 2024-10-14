@@ -1,6 +1,6 @@
 import { parentPort, workerData } from 'worker_threads';
 import dayjs from 'dayjs';
-import { calculateReturns } from '../analyze.js';
+import { calculateReturns } from '../calculate.js';
 
 const groupByBuyerIdentifier = (records) => {
   return records.reduce((grouped, row) => {
@@ -71,10 +71,22 @@ const results = tasks.map(task => {
   }
 
   const isCorrectSizeByTransactionValue = (company) => {
-    const transactionSizeRelativeToBuyerMarketValue = company.transactionSize / buyerMarketValue;
+    if (sizeByTransactionValue === 'all') {
+      return true;
+    }
+
+    if (company.transactionSize === null || company.buyer.marketValue === null) {
+      return false;
+    }
+
+    const transactionSizeRelativeToBuyerMarketValue = company.transactionSize / company.buyer.marketValue;
+
+    if (transactionSizeRelativeToBuyerMarketValue < 0) {
+      return false;
+    }
 
     if (sizeByTransactionValue === '0-2%') {
-      return transactionSizeRelativeToBuyerMarketValue < 0.02;
+      return transactionSizeRelativeToBuyerMarketValue >= 0 && transactionSizeRelativeToBuyerMarketValue < 0.02;
     }
 
     if (sizeByTransactionValue === '2-10%') {
@@ -87,6 +99,10 @@ const results = tasks.map(task => {
 
     if (sizeByTransactionValue === '25-50%') {
       return transactionSizeRelativeToBuyerMarketValue >= 0.25 && transactionSizeRelativeToBuyerMarketValue < 0.5;
+    }
+
+    if (sizeByTransactionValue === '50-100%') {
+      return transactionSizeRelativeToBuyerMarketValue >= 0.5 && transactionSizeRelativeToBuyerMarketValue < 1;
     }
 
     return true;
