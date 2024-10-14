@@ -88,113 +88,94 @@ export const acquisitionLabelFilters = dateRanges.flatMap(dateRange =>
   )
 );
 
+const groupByBuyerIdentifier = (records) => {
+  return records.reduce((grouped, row) => {
+    const buyerId = row.buyer.identifier;
+    if (!grouped[buyerId]) {
+      grouped[buyerId] = [];
+    }
+    grouped[buyerId].push(row);
+    return grouped;
+  }, {});
+}
+
 export const getFilterSharePriceIndexData = (companyData, sharePriceData, indexPriceData) => {
-  // Pre-process data
-  const buyerIdentifierMap = new Map();
-  const dealTypesSet = new Set();
-  const processedData = [];
-
-  // Helper function to compare dates
-  const compareDates = (date1, date2) => {
-    return date1.getTime() - date2.getTime();
-  };
-
-  // Single loop to process all data
-  for (let i = 0; i < companyData.length; i++) {
-    const company = companyData[i];
-    const sharePrice = sharePriceData[i];
-    const indexPrice = indexPriceData[i];
-
-    const buyerId = company.buyer.identifier;
-    if (!buyerIdentifierMap.has(buyerId)) {
-      buyerIdentifierMap.set(buyerId, []);
-    }
-    buyerIdentifierMap.get(buyerId).push(i);
-
-    company.dealTypes.forEach(type => dealTypesSet.add(type));
-
-    const announcedDate = new Date(company.announcedDate);
-
-    let transactionSizeRelative = null;
-    if (company.transactionSize !== null && company.buyer.marketValue !== null) {
-      transactionSizeRelative = company.transactionSize / company.buyer.marketValue;
-    }
-
-    processedData.push({
-      index: i,
-      announcedDate,
-      isMinorityAcquisition: company.isMinorityAcquisition,
-      isWithdrawn: company.isWithdrawn,
-      isPublicCompany: company.isPublicCompany,
-      transactionSizeRelative,
-      dealTypes: company.dealTypes,
-      sharePrice,
-      indexPrice,
-      buyerId
-    });
-  }
+  const uniqueCompaniesAcquisitionsData = groupByBuyerIdentifier(companyData);
 
   const filterSharePriceIndexData = (filters) => {
     const { dateRange, status, type, dealType, publicOrPrivate, sizeByTransactionValue, acquisitionsNumber } = filters;
-    const startDate = new Date(dateRange.start);
-    const endDate = new Date(dateRange.end);
 
-    const filteredSharePrices = [];
-    const filteredIndexPrices = [];
+    const isInDateRange = company => {
+      const announcedDate = new Date(company.announcedDate);
+      return announcedDate > new Date(dateRange.start) && announcedDate < new Date(dateRange.end);
+    };
 
-    for (const item of processedData) {
-      // Date range check
-      if (compareDates(item.announcedDate, startDate) < 0 || compareDates(item.announcedDate, endDate) > 0) {
-        continue;
-      }
-
-      // Acquisition type check
-      if (type !== 'all' && item.isMinorityAcquisition !== (type === 'minority')) {
-        continue;
-      }
-
-      // Acquisition status check
-      if (status !== 'all' && item.isWithdrawn !== (status === 'withdrawn/terminated')) {
-        continue;
-      }
-
-      // Public or private check
-      if (publicOrPrivate !== 'all' && item.isPublicCompany !== (publicOrPrivate === 'public')) {
-        continue;
-      }
-
-      // Number of acquisitions check
-      const numberOfAcquisitions = buyerIdentifierMap.get(item.buyerId).length;
-      if (acquisitionsNumber !== 'all') {
-        if (acquisitionsNumber === '1' && numberOfAcquisitions !== 1) continue;
-        if (acquisitionsNumber === '2-5' && (numberOfAcquisitions < 2 || numberOfAcquisitions >= 5)) continue;
-        if (acquisitionsNumber === '5-20' && (numberOfAcquisitions < 5 || numberOfAcquisitions >= 20)) continue;
-        if (acquisitionsNumber === '>20' && numberOfAcquisitions <= 20) continue;
-      }
-
-      // Size by transaction value check
-      if (sizeByTransactionValue !== 'all') {
-        if (item.transactionSizeRelative === null) continue;
-        if (sizeByTransactionValue === '0-2%' && (item.transactionSizeRelative < 0 || item.transactionSizeRelative >= 0.02)) continue;
-        if (sizeByTransactionValue === '2-10%' && (item.transactionSizeRelative < 0.02 || item.transactionSizeRelative >= 0.1)) continue;
-        if (sizeByTransactionValue === '10-25%' && (item.transactionSizeRelative < 0.1 || item.transactionSizeRelative >= 0.25)) continue;
-        if (sizeByTransactionValue === '25-50%' && (item.transactionSizeRelative < 0.25 || item.transactionSizeRelative >= 0.5)) continue;
-        if (sizeByTransactionValue === '50-100%' && (item.transactionSizeRelative < 0.5 || item.transactionSizeRelative >= 1)) continue;
-        if (sizeByTransactionValue === '>100%' && item.transactionSizeRelative <= 1) continue;
-      }
-
-      // Deal type check
-      if (dealType !== 'all' && !item.dealTypes.includes(dealType)) {
-        continue;
-      }
-
-      // If we've made it here, the item passes all filters
-      filteredSharePrices.push(item.sharePrice);
-      filteredIndexPrices.push(item.indexPrice);
+    const isCorrectAcquisitionType = (company) => {
+      if (type === 'all') return true;
+      return type === 'minority' ? company.isMinorityAcquisition : !company.isMinorityAcquisition;
     }
 
-    return [filteredSharePrices, filteredIndexPrices];
-  };
+    const isCorrectAcquisitionStatus = (company) => {
+      if (status === 'all') return true;
+      return status === 'withdrawn/terminated' ? company.isWithdrawn : !company.isWithdrawn;
+    }
+
+    const isCorrectAcquisitionPublicOrPrivate = (company) => {
+      if (publicOrPrivate === 'all') return true;
+      return publicOrPrivate === 'public' ? company.isPublicCompany : !company.isPublicCompany;
+    }
+
+    const isCorrectNumberOfAcquisitions = (company) => {
+      const identifier = company.buyer.identifier;
+      const numberOfAcquisitions = uniqueCompaniesAcquisitionsData[identifier].length;
+
+      if (acquisitionsNumber === '1') return numberOfAcquisitions === 1;
+      if (acquisitionsNumber === '2-5') return numberOfAcquisitions >= 2 && numberOfAcquisitions < 5;
+      if (acquisitionsNumber === '5-20') return numberOfAcquisitions >= 5 && numberOfAcquisitions < 20;
+      return true;
+    }
+
+    const isCorrectSizeByTransactionValue = (company) => {
+      if (sizeByTransactionValue === 'all') return true;
+      if (company.transactionSize === null || company.buyer.marketValue === null) return false;
+
+      const transactionSizeRelativeToBuyerMarketValue = company.transactionSize / company.buyer.marketValue;
+      if (transactionSizeRelativeToBuyerMarketValue < 0) return false;
+
+      if (sizeByTransactionValue === '0-2%') return transactionSizeRelativeToBuyerMarketValue < 0.02;
+      if (sizeByTransactionValue === '2-10%') return transactionSizeRelativeToBuyerMarketValue >= 0.02 && transactionSizeRelativeToBuyerMarketValue < 0.1;
+      if (sizeByTransactionValue === '10-25%') return transactionSizeRelativeToBuyerMarketValue >= 0.1 && transactionSizeRelativeToBuyerMarketValue < 0.25;
+      if (sizeByTransactionValue === '25-50%') return transactionSizeRelativeToBuyerMarketValue >= 0.25 && transactionSizeRelativeToBuyerMarketValue < 0.5;
+      if (sizeByTransactionValue === '50-100%') return transactionSizeRelativeToBuyerMarketValue >= 0.5 && transactionSizeRelativeToBuyerMarketValue < 1;
+      return true;
+    }
+
+    const isCorrectDealType = (company) => {
+      if (dealType === 'all') return true;
+      return company.dealTypes.some((type) => type === dealType);
+    }
+
+    const filteredSharePriceData = [];
+    const filteredIndexPriceData = [];
+
+    for (let i = 0; i < companyData.length; i++) {
+      const company = companyData[i];
+
+      if (isCorrectAcquisitionType(company) &&
+        isCorrectDealType(company) &&
+        isCorrectAcquisitionStatus(company) &&
+        isCorrectNumberOfAcquisitions(company) &&
+        isCorrectAcquisitionPublicOrPrivate(company) &&
+        isCorrectSizeByTransactionValue(company) &&
+        isInDateRange(company)) {
+
+        filteredSharePriceData.push(sharePriceData[i]);
+        filteredIndexPriceData.push(indexPriceData[i]);
+      }
+    }
+
+    return [filteredSharePriceData, filteredIndexPriceData];
+  }
 
   return filterSharePriceIndexData;
 };
