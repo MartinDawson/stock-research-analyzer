@@ -87,7 +87,7 @@ You can run the script with different values for arguments too, i.e here's the c
 node ./src/acquisitions/index.js ./data/input/acquisitions/us/data.csv ./data/input/acquisitions/us/acquirerSharePrices.csv ./data/input/acquisitions/us/acquirerSPXIndexPrices.csv --outputTopNumberCount 30 --minMarketCapForAnalyzingInM 10 --minAmountOfCompaniesInEachSampleSize 500"
 ```
 
-`outputTopNumberCount` -> Default 30: number of results to output for the `./data/output/acquisitions/returnsUS.json` file: `worstReturnsSinceAcquisition`, `bestReturnsSinceAcquisition`, `worstDrawdowns`, `bestPeaks`.
+`outputTopNumberCount` -> Default 30: number of results to output for the `./data/output/acquisitions/us/topReturns.json` file: `worstReturnsSinceAcquisition`, `bestReturnsSinceAcquisition`, `worstDrawdowns`, `bestPeaks`.
 
 Note: `allReturns` always returns everything that matches your other params anyway and ignores this flag.
 

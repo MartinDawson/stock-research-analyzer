@@ -57,7 +57,7 @@ const acquirerMarketCaps = [
 
 export const acquisitionDealTypeMap = {
   "All Deal Types": "all",
-  "New Shareholder Gaining Majority Control": "newShareholderMajority",
+  "New Shareholder Gaining Majority Control": "newShareholderGainingMajorityControl",
   "Cash Deal": "cashDeal",
   "Stock Deal": "stockDeal",
   "Earnout Payment": "earnoutPayment",
@@ -150,7 +150,7 @@ export const getFilterSharePriceIndexData = (companyData, sharePriceData, indexP
     const isCorrectAcquisitionPublicOrPrivate = (company) => {
       if (publicOrPrivate === 'all') return true;
 
-      return publicOrPrivate === 'public' ? company.isPublicCompany : !company.isPublicCompany;
+      return publicOrPrivate === 'public' ? company.seller.isPublicCompany : !company.seller.isPublicCompany;
     }
 
     const isCorrectNumberOfAcquisitions = (company) => {

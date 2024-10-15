@@ -46,6 +46,13 @@ const streamJsonToFile = async (data, filePath) => {
     }
   }
 };
+
+const writeJsonToFile = async (data, filePath) => {
+  const jsonString = JSON.stringify(data, null, 2);
+
+  await fs.writeFile(filePath, jsonString, 'utf8');
+};
+
 const main = async () => {
   const args = parseArguments();
   const fileContent = await fs.readFile(args.companyDataFile, 'utf8');
@@ -75,14 +82,20 @@ const main = async () => {
     filteredResultsWithData,
   );
 
-  const allData = processCalculationResults(calculationResults, timeSeriesHeader, args.outputTopNumberCount, args.minAmountOfCompaniesInEachSampleSizeForTopOutput);
-  const filePath = './data/output/acquisitions/returnsUS.json';
+  const { allReturns, ...topReturns } = processCalculationResults(calculationResults, timeSeriesHeader, args.outputTopNumberCount, args.minAmountOfCompaniesInEachSampleSizeForTopOutput);
+  const allReturnsFilePath = './data/output/acquisitions/us/allReturns.json';
+  const topReturnsFilePath = './data/output/acquisitions/us/topReturns.json';
 
-  console.log(`Streaming output to ${filePath}`);
+  console.log(`Streaming output for all returns to ${allReturnsFilePath} & top returns to ${topReturnsFilePath}`);
 
-  await streamJsonToFile(allData, filePath);
+  // Use streamJsonToFile for allReturns (large dataset)
+  // Use writeJsonToFile for topReturns (small object)
+  await Promise.all([
+    streamJsonToFile(allReturns, allReturnsFilePath),
+    writeJsonToFile(topReturns, topReturnsFilePath)
+  ]);
 
-  console.log(`Data has been written to ${filePath}`);
+  console.log(`Data has been written to ${allReturnsFilePath} & ${topReturnsFilePath}`);
 
   process.exit(0);
 };

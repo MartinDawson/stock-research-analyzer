@@ -8,7 +8,7 @@ const ReturnsChart = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('/output/acquisitions/returnsUS.json')
+    fetch('/output/acquisitions/us/topReturns.json')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');

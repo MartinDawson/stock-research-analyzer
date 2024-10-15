@@ -69,20 +69,24 @@ function analyzeFilters(returns) {
     };
   });
 
-  // Sort by average return (descending order)
   averageReturns.sort((a, b) => b.averageReturnSinceAcquisition - a.averageReturnSinceAcquisition);
 
   return averageReturns;
 }
 
 export function processCalculationResults(calculationResults, timeSeriesHeader, outputTopNumberCount, minAmountOfCompaniesInEachSampleSizeForTopOutput) {
-  const returns = calculationResults.map(({ filters, data }) => {
+  const returns = calculationResults.map(({ filters, data, count }) => {
     const [avgCumulativeAbnormalReturns, countPerMonth] = data;
-    return createConsolidatedReturns(filters, avgCumulativeAbnormalReturns, countPerMonth, timeSeriesHeader);
+    const returnsObject = createConsolidatedReturns(filters, avgCumulativeAbnormalReturns, countPerMonth, timeSeriesHeader);
+
+    return {
+      ...returnsObject,
+      count
+    }
   });
 
   const filterAnalysis = analyzeFilters(returns);
-  const filteredReturns = returns;//.filter(({ count }) => count >= minAmountOfCompaniesInEachSampleSizeForTopOutput);
+  const filteredReturns = returns.filter(({ count }) => count >= minAmountOfCompaniesInEachSampleSizeForTopOutput);
 
   return {
     filterAnalysis: filterAnalysis,

@@ -5,15 +5,16 @@ describe('getFilterSharePriceIndexData', () => {
   const mockCompanyData = [
     {
       buyer: { identifier: 'buyer1', marketValue: 1000 },
+      seller: { isPublicCompany: true },
       announcedDate: '1995-01-01',
       isMinorityAcquisition: false,
       isWithdrawn: false,
-      isPublicCompany: true,
       transactionSize: 100,
       dealTypes: ['cashDeal']
     },
     {
       buyer: { identifier: 'buyer2', marketValue: 2000 },
+      seller: { isPublicCompany: false },
       announcedDate: '2017-06-01',
       isMinorityAcquisition: true,
       isWithdrawn: true,
@@ -23,28 +24,28 @@ describe('getFilterSharePriceIndexData', () => {
     },
     {
       buyer: { identifier: 'buyer3', marketValue: 5000 },
+      seller: { isPublicCompany: true },
       announcedDate: '2020-01-01',
       isMinorityAcquisition: false,
       isWithdrawn: false,
-      isPublicCompany: true,
       transactionSize: 1250,
       dealTypes: ['lbo', 'cashDeal']
     },
     {
       buyer: { identifier: 'buyer4', marketValue: 10000 },
+      seller: { isPublicCompany: false },
       announcedDate: '2023-06-01',
       isMinorityAcquisition: false,
       isWithdrawn: false,
-      isPublicCompany: false,
       transactionSize: 6000,
       dealTypes: ['reverseMerger', 'stockDeal']
     },
     {
       buyer: { identifier: 'buyer3', marketValue: 5500 },
+      seller: { isPublicCompany: true },
       announcedDate: '2023-06-01',
       isMinorityAcquisition: false,
       isWithdrawn: false,
-      isPublicCompany: true,
       transactionSize: 50,
       dealTypes: ['bankruptcySale']
     },
