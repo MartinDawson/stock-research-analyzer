@@ -29,6 +29,8 @@ I wanted to go further than Aswath Damodaran does and test every combination so 
 
 There will be more to come such as how shareholder compensation affects prices, if you have any ideas just ask me and I will consider it as well.
 
+I tried it in Excel first but the logic needed is far too complex and much easier to do in code.
+
 ## Results
 ### Acquisitions
 TODO
