@@ -1,5 +1,5 @@
 {
-  "filterAnalysis": [
+  "typeOfAcquisition": [
     {
       "filter": "dealType:bankruptcySale",
       "averageReturnSinceAcquisition": 75.69,

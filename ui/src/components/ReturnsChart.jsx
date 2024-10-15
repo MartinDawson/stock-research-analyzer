@@ -1,5 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { sentenceCase } from "change-case";
+
+function customSentenceCase(str) {
+  // Split the string by spaces and special characters
+  const parts = str.split(/([^a-zA-Z0-9]+)/);
+
+  // Apply sentence case to each part and join them back together
+  return parts.map((part, index) => {
+    // Apply sentence case only to alphanumeric parts
+    if (/[a-zA-Z0-9]/.test(part)) {
+      return index === 0 ? sentenceCase(part) : part.toLowerCase();
+    }
+    // Return special characters as is
+    return part;
+  }).join('');
+}
 
 const AcquisitionCharts = () => {
   const [data, setData] = useState(null);
@@ -43,15 +59,26 @@ const AcquisitionCharts = () => {
     if (!chartData || chartData.length === 0) return <div>No data available</div>;
 
     if (chartType === 'typeOfAcquisition') {
-      const sortedData = [...chartData].sort((a, b) => b.averageReturnSinceAcquisition - a.averageReturnSinceAcquisition);
+      const sortedData = [...chartData].sort((a, b) => b.averageReturnSinceAcquisition - a.averageReturnSinceAcquisition).map((datum) => {
+        return {
+          ...datum,
+          label: customSentenceCase(datum.filter)
+        }
+      });
 
       return (
-        <div className="w-full h-[600px]">
+        <div className="w-full h-[800px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={sortedData} layout="vertical" margin={{ top: 5, right: 30, left: 200, bottom: 5 }}>
+            <BarChart data={sortedData} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" />
-              <YAxis dataKey="filter" type="category" width={180} />
+              <YAxis
+                dataKey="label"
+                type="category"
+                tick={{ angle: 0, textAnchor: 'end', fontSize: 12 }}
+                width={400}
+                interval={0}
+              />
               <Tooltip />
               <Legend />
               <Bar dataKey="averageReturnSinceAcquisition" fill="#8884d8" name="Avg Return Since Acquisition" />
@@ -64,9 +91,10 @@ const AcquisitionCharts = () => {
     const xAxisKey = 'months';
     const yAxisKey = 'averageCumulativeAbnormalReturnsSinceAcquisition';
 
+    const newChartData = [chartData[0]];
     const processedData = chartData[0][xAxisKey].map((x, i) => {
       const point = { [xAxisKey]: x };
-      chartData.forEach((dataset, index) => {
+      newChartData.forEach((dataset, index) => {
         point[`data${index}`] = dataset[yAxisKey][i];
       });
       return point;
@@ -81,7 +109,7 @@ const AcquisitionCharts = () => {
             <YAxis />
             <Tooltip />
             <Legend />
-            {chartData.map((dataset, index) => (
+            {newChartData.map((dataset, index) => (
               <Line
                 key={index}
                 type="monotone"
