@@ -3,16 +3,11 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { sentenceCase } from "change-case";
 
 function customSentenceCase(str) {
-  // Split the string by spaces and special characters
   const parts = str.split(/([^a-zA-Z0-9]+)/);
-
-  // Apply sentence case to each part and join them back together
   return parts.map((part, index) => {
-    // Apply sentence case only to alphanumeric parts
     if (/[a-zA-Z0-9]/.test(part)) {
       return index === 0 ? sentenceCase(part) : part.toLowerCase();
     }
-    // Return special characters as is
     return part;
   }).join('');
 }
@@ -91,35 +86,54 @@ const AcquisitionCharts = () => {
     const xAxisKey = 'months';
     const yAxisKey = 'averageCumulativeAbnormalReturnsSinceAcquisition';
 
-    const newChartData = [chartData[0]];
     const processedData = chartData[0][xAxisKey].map((x, i) => {
       const point = { [xAxisKey]: x };
-      newChartData.forEach((dataset, index) => {
+      chartData.forEach((dataset, index) => {
         point[`data${index}`] = dataset[yAxisKey][i];
       });
       return point;
     }).filter(item => Object.values(item).some(val => val !== null && val !== undefined));
 
+    const CustomizedLegend = ({ payload }) => (
+      <div className="mt-4 max-h-60 overflow-y-auto">
+        <ul className="list-none p-0">
+          {payload.map((entry, index) => (
+            <li key={`item-${index}`} className="inline-flex items-center mr-4 mb-2">
+              <svg width="10" height="10" className="mr-1">
+                <rect width="10" height="10" fill={entry.color} />
+              </svg>
+              <span className="text-sm">{entry.value} (Count: {entry.count})</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+
     return (
-      <div className="w-full h-[600px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={processedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey={xAxisKey} />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            {newChartData.map((dataset, index) => (
-              <Line
-                key={index}
-                type="monotone"
-                dataKey={`data${index}`}
-                stroke={colors[index % colors.length]}
-                name={dataset.filters ? JSON.stringify(dataset.filters) : `Dataset ${index + 1}`}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+      <div className="w-full">
+        <div className="h-[600px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={processedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey={xAxisKey} />
+              <YAxis />
+              {chartData.map((dataset, index) => (
+                <Line
+                  key={index}
+                  type="monotone"
+                  dataKey={`data${index}`}
+                  stroke={colors[index % colors.length]}
+                  name={dataset.filters ? JSON.stringify(dataset.filters) : `Dataset ${index + 1}`}
+                />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <CustomizedLegend payload={chartData.map((dataset, index) => ({
+          count: dataset.count,
+          value: dataset.filters ? JSON.stringify(dataset.filters) : `Dataset ${index + 1}`,
+          color: colors[index % colors.length]
+        }))} />
       </div>
     );
   };
