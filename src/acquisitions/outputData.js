@@ -88,8 +88,24 @@ export function processCalculationResults(calculationResults, timeSeriesHeader, 
   const typeOfAcquisition = analyzeTypeOfAcquisition(returns);
   const filteredReturns = returns.filter(({ count }) => count >= minAmountOfCompaniesInEachSampleSizeForTopOutput);
 
+  const allAcquisitionsReturn = filteredReturns.find(({ filters }) => {
+    return filters.dateRange === "all" &&
+      filters.sizeByTransactionValue === "all" &&
+      filters.publicOrPrivate === "all" &&
+      filters.acquisitionsNumber === "all" &&
+      filters.acquirerMarketCap === "all" &&
+      filters.status === "all" &&
+      filters.dealType === "all" &&
+      filters.acquisitionType === "all";
+  });
+
+  if (!allAcquisitionsReturn) {
+    throw new Error('Could not find the allAcquisitions. Did you forget to add a filter condition here?');
+  }
+
   return {
     typeOfAcquisition,
+    allAcquisitionsReturn,
     worstReturnsSinceAcquisition: getTopReturns(filteredReturns, outputTopNumberCount, 'lastMonthSinceAcquisition', true),
     bestReturnsSinceAcquisition: getTopReturns(filteredReturns, outputTopNumberCount, 'lastMonthSinceAcquisition', false),
     worstDrawdowns: getTopReturns(filteredReturns, outputTopNumberCount, 'drawdown', true),
