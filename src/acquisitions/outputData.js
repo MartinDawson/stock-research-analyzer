@@ -1,8 +1,8 @@
-function createConsolidatedReturns(label, avgCumulativeAbnormalReturns, countPerMonth, timeSeriesHeader) {
+function createConsolidatedReturns(filters, avgCumulativeAbnormalReturns, countPerMonth, timeSeriesHeader) {
   const month0Value = avgCumulativeAbnormalReturns[5];
 
   return {
-    label,
+    filters,
     months: timeSeriesHeader,
     counts: countPerMonth,
     averageCumulativeAbnormalReturns: avgCumulativeAbnormalReturns.map(returnValue =>
@@ -39,17 +39,56 @@ function getTopReturns(returns, count, metric, ascending = true) {
   return sortedReturns.slice(0, count);
 }
 
-export function processCalculationResults(calculationResults, timeSeriesHeader, outputTopNumberCount) {
-  const returns = calculationResults.map(({ label, data }) => {
-    const [avgCumulativeAbnormalReturns, countPerMonth] = data;
-    return createConsolidatedReturns(label, avgCumulativeAbnormalReturns, countPerMonth, timeSeriesHeader);
+function analyzeFilters(returns) {
+  const filterReturns = {};
+  const filterCounts = {};
+
+  returns.forEach(item => {
+    const filters = item.filters;
+    const finalReturn = item.averageCumulativeAbnormalReturnsSinceAcquisition[item.averageCumulativeAbnormalReturnsSinceAcquisition.length - 1];
+
+    if (finalReturn !== null) {
+      Object.entries(filters).forEach(([filterType, filterValue]) => {
+        const filterKey = `${filterType}:${filterValue}`;
+        if (!filterReturns[filterKey]) {
+          filterReturns[filterKey] = [];
+          filterCounts[filterKey] = 0;
+        }
+        filterReturns[filterKey].push(finalReturn);
+        filterCounts[filterKey]++;
+      });
+    }
   });
 
+  const averageReturns = Object.entries(filterReturns).map(([filterKey, returns]) => {
+    const averageReturnSinceAcquisition = returns.reduce((sum, value) => sum + value, 0) / returns.length;
+    return {
+      filter: filterKey,
+      averageReturnSinceAcquisition: Number(averageReturnSinceAcquisition.toFixed(2)),
+      count: filterCounts[filterKey]
+    };
+  });
+
+  // Sort by average return (descending order)
+  averageReturns.sort((a, b) => b.averageReturnSinceAcquisition - a.averageReturnSinceAcquisition);
+
+  return averageReturns;
+}
+
+export function processCalculationResults(calculationResults, timeSeriesHeader, outputTopNumberCount) {
+  const returns = calculationResults.map(({ filters, data }) => {
+    const [avgCumulativeAbnormalReturns, countPerMonth] = data;
+    return createConsolidatedReturns(filters, avgCumulativeAbnormalReturns, countPerMonth, timeSeriesHeader);
+  });
+
+  const filterAnalysis = analyzeFilters(returns);
+
   return {
-    allReturns: returns,
+    filterAnalysis: filterAnalysis,
     worstReturnsSinceAcquisition: getTopReturns(returns, outputTopNumberCount, 'lastMonthSinceAcquisition', true),
     bestReturnsSinceAcquisition: getTopReturns(returns, outputTopNumberCount, 'lastMonthSinceAcquisition', false),
     worstDrawdowns: getTopReturns(returns, outputTopNumberCount, 'drawdown', true),
-    bestPeaks: getTopReturns(returns, outputTopNumberCount, 'peak', false)
+    bestPeaks: getTopReturns(returns, outputTopNumberCount, 'peak', false),
+    allReturns: returns,
   };
 }

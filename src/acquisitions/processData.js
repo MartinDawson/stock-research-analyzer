@@ -1,15 +1,13 @@
 import dayjs from 'dayjs';
 import { parse } from 'csv-parse/sync';
-import { acquisitionDealTypes } from './acquisitionFilters.js';
+import { acquisitionDealTypeMap } from './acquisitionFilters.js';
 
-function getAcquisitionTypes(data) {
-  const findType = ({ label, type }) => {
-    const index = data.indexOf(label);
+function getAcquisitionTypes(labelsString) {
+  const labels = labelsString.split(',');
 
-    return index !== -1 ? type : null;
-  };
-
-  return acquisitionDealTypes.map(findType).filter(Boolean);
+  return labels.map((label) => {
+    return acquisitionDealTypeMap[label];
+  })
 }
 
 const extractId = (field) => {

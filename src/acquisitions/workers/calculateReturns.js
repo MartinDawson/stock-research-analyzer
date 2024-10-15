@@ -3,7 +3,7 @@ import { calculateReturns } from '../../calculate.js';
 
 const { tasks } = workerData;
 
-const results = tasks.map((task, i) => {
+const results = tasks.map((task) => {
   const { sharePriceData, indexPriceData, ...newTask } = task;
   const data = calculateReturns(sharePriceData, indexPriceData);
 

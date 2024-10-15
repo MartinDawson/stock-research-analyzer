@@ -5,12 +5,12 @@ const { tasks, sharedData } = workerData;
 const { companyData, sharePriceData, indexPriceData } = sharedData;
 const filterSharePriceIndexData = getFilterSharePriceIndexData(companyData, sharePriceData, indexPriceData);
 
-const results = tasks.map(({ label, filters }) => {
+const results = tasks.map((filters) => {
   const [filteredSharePriceData, filteredIndexPriceData] = filterSharePriceIndexData(filters);
   const count = filteredSharePriceData.length;
 
   return {
-    label,
+    filters,
     sharePriceData: filteredSharePriceData,
     indexPriceData: filteredIndexPriceData,
     count

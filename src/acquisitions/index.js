@@ -6,7 +6,7 @@ import { convertBadPriceDataToNull, filterOutCompaniesAndPricesWhereMarketCapIsT
 import { processAcquisitionData } from './processData.js';
 import { runOnChunkedThreads } from '../main.js';
 import { extractColumnHeaderAndData, processTimeseriesData } from '../data.js';
-import { acquisitionLabelFilters } from './acquisitionFilters.js';
+import { acquisitionFilters } from './acquisitionFilters.js';
 import { processCalculationResults } from './outputData.js';
 import { colsInData } from '../consts.js';
 import { parseArguments } from '../args.js'
@@ -39,7 +39,7 @@ const main = async () => {
 
   const filterResults = (await runOnChunkedThreads(
     './src/acquisitions/workers/calculateFilteredPrices.js',
-    acquisitionLabelFilters,
+    acquisitionFilters,
     { companyData: filteredCompanyData, sharePriceData: convertedSharePriceData, indexPriceData: convertedIndexPriceData }
   )).filter(({ count }) => count >= args.minAmountOfCompaniesInEachSampleSize);
 
@@ -53,7 +53,7 @@ const main = async () => {
 
   const options = new FracturedJsonOptions();
 
-  options.MaxTotalLineLength = 120;
+  options.MaxTotalLineLength = 240;
   options.MaxInlineComplexity = Infinity;
 
   const formatter = new Formatter();
