@@ -19,7 +19,7 @@ For example to acquisitions, run:
 
 It will take a few minutes to run, depending on the power of your PC and how many cores you have.
 
-It will output the result in `./data/output/acquisitions`.
+It will output the result in `./data/output` with the top highlights & `./data/outputRaw` with the entire dump for every combination.
 
 ## Why?
 
@@ -87,7 +87,7 @@ You can run the script with different values for arguments too, i.e here's the c
 node ./src/acquisitions/index.js ./data/input/acquisitions/us/data.csv ./data/input/acquisitions/us/acquirerSharePrices.csv ./data/input/acquisitions/us/acquirerSPXIndexPrices.csv --outputTopNumberCount 30 --minMarketCapForAnalyzingInM 10 --minAmountOfCompaniesInEachSampleSize 500"
 ```
 
-`outputTopNumberCount` -> Default 30: number of results to output for the `./data/output/acquisitions/us/topReturns.json` file: `worstReturnsSinceAcquisition`, `bestReturnsSinceAcquisition`, `worstDrawdowns`, `bestPeaks`.
+`outputTopNumberCount` -> Default 30: number of results to output for the `./data/output/acquisitionsTopUS.json` file: `worstReturnsSinceAcquisition`, `bestReturnsSinceAcquisition`, `worstDrawdowns`, `bestPeaks`.
 
 Note: `allReturns` always returns everything that matches your other params anyway and ignores this flag.
 

@@ -39,7 +39,7 @@ function getTopReturns(returns, count, metric, ascending = true) {
   return sortedReturns.slice(0, count);
 }
 
-function analyzeFilters(returns) {
+function analyzeTypeOfAcquisition(returns) {
   const filterReturns = {};
   const filterCounts = {};
 
@@ -85,11 +85,11 @@ export function processCalculationResults(calculationResults, timeSeriesHeader, 
     }
   });
 
-  const filterAnalysis = analyzeFilters(returns);
+  const typeOfAcquisition = analyzeTypeOfAcquisition(returns);
   const filteredReturns = returns.filter(({ count }) => count >= minAmountOfCompaniesInEachSampleSizeForTopOutput);
 
   return {
-    filterAnalysis: filterAnalysis,
+    typeOfAcquisition,
     worstReturnsSinceAcquisition: getTopReturns(filteredReturns, outputTopNumberCount, 'lastMonthSinceAcquisition', true),
     bestReturnsSinceAcquisition: getTopReturns(filteredReturns, outputTopNumberCount, 'lastMonthSinceAcquisition', false),
     worstDrawdowns: getTopReturns(filteredReturns, outputTopNumberCount, 'drawdown', true),

@@ -83,10 +83,10 @@ const main = async () => {
   );
 
   const { allReturns, ...topReturns } = processCalculationResults(calculationResults, timeSeriesHeader, args.outputTopNumberCount, args.minAmountOfCompaniesInEachSampleSizeForTopOutput);
-  const allReturnsFilePath = './data/output/acquisitions/us/allReturns.json';
-  const topReturnsFilePath = './data/output/acquisitions/us/topReturns.json';
+  const allReturnsFilePath = './data/outputRaw/acquisitionsUS.json';
+  const topReturnsFilePath = './data/output/acquisitionsTopUS.json';
 
-  console.log(`Streaming output for all returns to ${allReturnsFilePath} & top returns to ${topReturnsFilePath}`);
+  console.log(`Streaming output for all raw returns to ${allReturnsFilePath} & top returns to ${topReturnsFilePath}`);
 
   // Use streamJsonToFile for allReturns (large dataset)
   // Use writeJsonToFile for topReturns (small object)
