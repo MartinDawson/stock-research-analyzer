@@ -1,10 +1,13 @@
 import fs from 'fs/promises';
+import { createWriteStream } from 'fs';
 import dayjs from 'dayjs';
-import { Formatter, FracturedJsonOptions } from 'fracturedjsonjs';
+import { Readable } from 'stream';
+import { pipeline } from 'stream/promises';
+import JSONStream from 'jsonstream';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
 import { convertBadPriceDataToNull, filterOutCompaniesAndPricesWhereMarketCapIsTooSmall } from '../cleanData.js';
 import { processAcquisitionData } from './processData.js';
-import { runOnChunkedThreads } from '../main.js';
+import { runOnChunkedThreads } from '../threads.js';
 import { extractColumnHeaderAndData, processTimeseriesData } from '../data.js';
 import { acquisitionFilters } from './acquisitionFilters.js';
 import { processCalculationResults } from './outputData.js';
@@ -21,6 +24,28 @@ const checkArrayLengths = (companyData, sharePriceData, indexPriceData) => {
   }
 }
 
+// Needed due to the output being large to stop out of memory errors
+const streamJsonToFile = async (data, filePath) => {
+  const readableStream = Readable.from([data]);
+  const jsonStringify = JSONStream.stringify();
+
+  let fileHandle;
+  try {
+    fileHandle = await fs.open(filePath, 'w');
+    const writeStream = createWriteStream(null, { fd: fileHandle.fd });
+
+    await pipeline(
+      readableStream,
+      jsonStringify,
+      writeStream
+    );
+    fileHandle = null;
+  } finally {
+    if (fileHandle) {
+      await fileHandle.close();
+    }
+  }
+};
 const main = async () => {
   const args = parseArguments();
   const fileContent = await fs.readFile(args.companyDataFile, 'utf8');
@@ -40,31 +65,26 @@ const main = async () => {
   const filterResults = (await runOnChunkedThreads(
     './src/acquisitions/workers/calculateFilteredPrices.js',
     acquisitionFilters,
-    { companyData: filteredCompanyData, sharePriceData: convertedSharePriceData, indexPriceData: convertedIndexPriceData }
-  )).filter(({ count }) => count >= args.minAmountOfCompaniesInEachSampleSize);
+    { companyData: filteredCompanyData, sharePriceData: convertedSharePriceData, indexPriceData: convertedIndexPriceData, minMarketCapForAnalyzingInM: args.minMarketCapForAnalyzingInM }
+  ))
+
+  const filteredResultsWithData = filterResults.filter(({ count }) => count != 0);
 
   const calculationResults = await runOnChunkedThreads(
     './src/acquisitions/workers/calculateReturns.js',
-    filterResults,
+    filteredResultsWithData,
   );
 
-  const allData = processCalculationResults(calculationResults, timeSeriesHeader, args.outputTopNumberCount);
-  const filePath = './data/output/acquisitions/all_data.json';
+  const allData = processCalculationResults(calculationResults, timeSeriesHeader, args.outputTopNumberCount, args.minAmountOfCompaniesInEachSampleSizeForTopOutput);
+  const filePath = './data/output/acquisitions/returnsUS.json';
 
-  const options = new FracturedJsonOptions();
+  console.log(`Streaming output to ${filePath}`);
 
-  options.MaxTotalLineLength = 240;
-  options.MaxInlineComplexity = Infinity;
-
-  const formatter = new Formatter();
-
-  formatter.Options = options;
-
-  const jsonString = formatter.Serialize(allData);
-
-  await fs.writeFile(filePath, jsonString);
+  await streamJsonToFile(allData, filePath);
 
   console.log(`Data has been written to ${filePath}`);
+
+  process.exit(0);
 };
 
 main();

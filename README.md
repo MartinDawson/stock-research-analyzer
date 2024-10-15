@@ -13,9 +13,9 @@ Pre-requirements to run:
 
 Then you can run the scripts in `package.json` `scripts` sections.
 
-For example to analyze US acquisitions, run:
+For example to acquisitions, run:
 
-`npm run analyze:acquisitions:us`
+`npm run analyze`
 
 It will take a few minutes to run, depending on the power of your PC and how many cores you have.
 
@@ -87,15 +87,15 @@ You can run the script with different values for arguments too, i.e here's the c
 node ./src/acquisitions/index.js ./data/input/acquisitions/us/data.csv ./data/input/acquisitions/us/acquirerSharePrices.csv ./data/input/acquisitions/us/acquirerSPXIndexPrices.csv --outputTopNumberCount 30 --minMarketCapForAnalyzingInM 10 --minAmountOfCompaniesInEachSampleSize 500"
 ```
 
-`outputTopNumberCount` -> Default 30: number of results to output for the `./data/output/acquisitions/all_data.json` file: `worstReturnsSinceAcquisition`, `bestReturnsSinceAcquisition`, `worstDrawdowns`, `bestPeaks`.
+`outputTopNumberCount` -> Default 30: number of results to output for the `./data/output/acquisitions/returnsUS.json` file: `worstReturnsSinceAcquisition`, `bestReturnsSinceAcquisition`, `worstDrawdowns`, `bestPeaks`.
 
 Note: `allReturns` always returns everything that matches your other params anyway and ignores this flag.
 
 `minMarketCapForAnalyzingInM` -> Default 10: this is recommended because really small nano caps < $10m in marketcap have some ridicilous percentage changes, you can increase this though if you want only larger market caps in your analysis.
 
-`minAmountOfCompaniesInEachSampleSize` -> Default 500: a minimum of at least 200 is probably best, otherwise you will have some filter combinations that have only a few combinations, therefore the output of `all_data.json` will contain some really wild volatile swings in some of the combinations of share prices and you won't be able to distern anything useful from a sample size of < 200 either probably.
+`minAmountOfCompaniesInEachSampleSize` -> Default 500: this determines how much the sample sizes of `worstReturnsSinceAcquisition`, `bestReturnsSinceAcquisition`, `bestPeaks` and `worstDrawdowns` need to have a minimum of. If you didn't have this then the top results in these arrays would be ones with really low sample sizes and useless for drawing any conclusions on.
 
-In the `all_data.json` the sample size counts are shown for each month as well so you can see if the values are too small, i.e:
+In the `returns.json` the sample size counts are shown for each month as well so you can see if the values are too small, i.e:
 
 ```json
   "counts": [

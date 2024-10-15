@@ -3,12 +3,15 @@ import { calculateReturns } from '../../calculate.js';
 
 const { tasks } = workerData;
 
-const results = tasks.map((task) => {
+const results = [];
+
+for (const task of tasks) {
   const { sharePriceData, indexPriceData, ...newTask } = task;
   const data = calculateReturns(sharePriceData, indexPriceData);
 
-  return { ...newTask, data };
-});
+  results.push({ ...newTask, data });
 
-parentPort.postMessage(results);
+  parentPort.postMessage({ type: 'progress', increment: 1 });
+}
 
+parentPort.postMessage({ type: 'result', data: results });

@@ -7,7 +7,7 @@ export const parseArguments = () => {
     indexPriceDataFile: args[2],
     outputTopNumberCount: 30,
     minMarketCapForAnalyzingInM: 10,
-    minAmountOfCompaniesInEachSampleSize: 500,
+    minAmountOfCompaniesInEachSampleSizeForTopOutput: 500,
   };
 
   for (let i = 3; i < args.length; i += 2) {
@@ -18,8 +18,8 @@ export const parseArguments = () => {
       case '--minMarketCapForAnalyzingInM':
         parsedArgs.minMarketCapForAnalyzingInM = parseInt(args[i + 1]);
         break;
-      case '--minAmountOfCompaniesInEachSampleSize':
-        parsedArgs.minAmountOfCompaniesInEachSampleSize = parseInt(args[i + 1]);
+      case '--minAmountOfCompaniesInEachSampleSizeForTopOutput':
+        parsedArgs.minAmountOfCompaniesInEachSampleSizeForTopOutput = parseInt(args[i + 1]);
         break;
     }
   }

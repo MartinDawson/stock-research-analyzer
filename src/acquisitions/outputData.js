@@ -75,20 +75,21 @@ function analyzeFilters(returns) {
   return averageReturns;
 }
 
-export function processCalculationResults(calculationResults, timeSeriesHeader, outputTopNumberCount) {
+export function processCalculationResults(calculationResults, timeSeriesHeader, outputTopNumberCount, minAmountOfCompaniesInEachSampleSizeForTopOutput) {
   const returns = calculationResults.map(({ filters, data }) => {
     const [avgCumulativeAbnormalReturns, countPerMonth] = data;
     return createConsolidatedReturns(filters, avgCumulativeAbnormalReturns, countPerMonth, timeSeriesHeader);
   });
 
   const filterAnalysis = analyzeFilters(returns);
+  const filteredReturns = returns;//.filter(({ count }) => count >= minAmountOfCompaniesInEachSampleSizeForTopOutput);
 
   return {
     filterAnalysis: filterAnalysis,
-    worstReturnsSinceAcquisition: getTopReturns(returns, outputTopNumberCount, 'lastMonthSinceAcquisition', true),
-    bestReturnsSinceAcquisition: getTopReturns(returns, outputTopNumberCount, 'lastMonthSinceAcquisition', false),
-    worstDrawdowns: getTopReturns(returns, outputTopNumberCount, 'drawdown', true),
-    bestPeaks: getTopReturns(returns, outputTopNumberCount, 'peak', false),
+    worstReturnsSinceAcquisition: getTopReturns(filteredReturns, outputTopNumberCount, 'lastMonthSinceAcquisition', true),
+    bestReturnsSinceAcquisition: getTopReturns(filteredReturns, outputTopNumberCount, 'lastMonthSinceAcquisition', false),
+    worstDrawdowns: getTopReturns(filteredReturns, outputTopNumberCount, 'drawdown', true),
+    bestPeaks: getTopReturns(filteredReturns, outputTopNumberCount, 'peak', false),
     allReturns: returns,
   };
 }
