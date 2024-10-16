@@ -32,7 +32,7 @@ export const analyzeAcquisitions = async (companyData, sharePriceData, indexPric
 
   const filterResults = (await runOnChunkedThreads(
     `${workerFolderPath}/calculateFilteredPrices.js`,
-    [acquisitionFilters[0]],
+    acquisitionFilters,
     { companyData: filteredCompanyData, sharePriceData: convertedSharePriceData, indexPriceData: convertedIndexPriceData }
   ))
 
