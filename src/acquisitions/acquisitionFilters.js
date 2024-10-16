@@ -115,7 +115,7 @@ const groupByBuyerIdentifier = (records) => {
   }, {});
 }
 
-export const getFilterSharePriceIndexData = (companyData, sharePriceData, indexPriceData, minMarketCapForAnalyzingInM) => {
+export const getFilterSharePriceIndexData = (companyData, sharePriceData, indexPriceData) => {
   const uniqueCompaniesAcquisitionsData = groupByBuyerIdentifier(companyData);
 
   const filterSharePriceIndexData = ({
@@ -185,8 +185,8 @@ export const getFilterSharePriceIndexData = (companyData, sharePriceData, indexP
     const isCorrectMarketCapValue = (company) => {
       checkBuyerMarketValueNotNull(company);
 
-      if (company.buyer.marketValue < minMarketCapForAnalyzingInM) {
-        throw new Error(`buyer marketValues should never be less than ${minMarketCapForAnalyzingInM}m as they should be filtered out in pre-processing to stop weird values.`)
+      if (company.buyer.marketValue < 10) {
+        throw new Error(`buyer marketValues should never be less than 10m as they should be filtered out in pre-processing to stop weird values.`)
       }
 
       if (acquirerMarketCap === 'all') return true;

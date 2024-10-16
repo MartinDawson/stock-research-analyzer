@@ -2,8 +2,8 @@ import { parentPort, workerData } from 'worker_threads';
 import { getFilterSharePriceIndexData } from '../acquisitionFilters.js';
 
 const { tasks, sharedData } = workerData;
-const { companyData, sharePriceData, indexPriceData, minMarketCapForAnalyzingInM } = sharedData;
-const filterSharePriceIndexData = getFilterSharePriceIndexData(companyData, sharePriceData, indexPriceData, minMarketCapForAnalyzingInM);
+const { companyData, sharePriceData, indexPriceData } = sharedData;
+const filterSharePriceIndexData = getFilterSharePriceIndexData(companyData, sharePriceData, indexPriceData);
 
 const results = [];
 

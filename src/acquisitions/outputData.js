@@ -5,11 +5,9 @@ function createConsolidatedReturns(filters, avgCumulativeAbnormalReturns, countP
     filters,
     months: timeSeriesHeader,
     counts: countPerMonth,
-    averageCumulativeAbnormalReturns: avgCumulativeAbnormalReturns.map(returnValue =>
-      returnValue !== null ? Number((returnValue * 100).toFixed(2)) : null
-    ),
+    averageCumulativeAbnormalReturns: avgCumulativeAbnormalReturns,
     averageCumulativeAbnormalReturnsSinceAcquisition: avgCumulativeAbnormalReturns.map((returnValue, index) =>
-      index >= 5 && returnValue !== null ? Number(((returnValue - month0Value) * 100).toFixed(2)) : null
+      index >= 5 && returnValue !== null ? returnValue - month0Value : null
     )
   };
 }
@@ -88,7 +86,7 @@ export function processCalculationResults(calculationResults, timeSeriesHeader, 
   const typeOfAcquisition = analyzeTypeOfAcquisition(returns);
   const filteredReturns = returns.filter(({ count }) => count >= minAmountOfCompaniesInEachSampleSizeForTopOutput);
 
-  const allAcquisitionsReturn = filteredReturns.find(({ filters }) => {
+  const allAcquisitionsReturn = returns.find(({ filters }) => {
     return filters.dateRange === "all" &&
       filters.sizeByTransactionValue === "all" &&
       filters.publicOrPrivate === "all" &&

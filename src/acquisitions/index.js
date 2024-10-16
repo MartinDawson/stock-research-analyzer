@@ -6,31 +6,18 @@ import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import JSONStream from 'jsonstream';
 import customParseFormat from 'dayjs/plugin/customParseFormat.js';
-import { convertBadPriceDataToNull, filterOutCompaniesAndPricesWhereMarketCapIsTooSmall } from '../cleanData.js';
 import { processAcquisitionData } from './processData.js';
-import { runOnChunkedThreads } from '../threads.js';
-import { extractColumnHeaderAndData, processTimeseriesData } from '../data.js';
-import { acquisitionFilters } from './acquisitionFilters.js';
-import { processCalculationResults } from './outputData.js';
 import { colsInData } from '../consts.js';
 import { parseArguments } from '../args.js'
 import { rootDirPath } from '../utils.js';
+import { analyzeAcquisitions } from './analyzeAcquisitions.js';
+import { processTimeseriesData } from '../data.js';
 
 const inputAcquisitionsPath = path.join(rootDirPath, 'data', 'input/acquisitions');
 const outputAcquisitionsPath = path.join(rootDirPath, 'data', 'output/acquisitions');
 const outputRawAcquisitionsPath = path.join(rootDirPath, 'data', 'outputRaw/acquisitions');
 
-const workerFolderPath = path.join(rootDirPath, 'src/acquisitions/workers');
-
 dayjs.extend(customParseFormat);
-
-const checkArrayLengths = (companyData, sharePriceData, indexPriceData) => {
-  if (companyData.length !== sharePriceData.length
-    || companyData.length !== indexPriceData.length
-    || sharePriceData.length !== indexPriceData.length) {
-    throw new Error(`Array lengths are not equal. companyData: ${companyData.length}, sharePriceData: ${sharePriceData.length}, indexPriceData: ${indexPriceData.length}`);
-  }
-}
 
 // Needed due to the output being large to stop out of memory errors
 const streamJsonToFile = async (data, filePath) => {
@@ -75,29 +62,8 @@ const main = async () => {
   const indexPriceDataPath = `${inputAcquisitionsPath}/${regionToAnalyze}/acquirer_index_prices.csv`;
   const indexPriceData = await processTimeseriesData(indexPriceDataPath, colsInData)
 
-  const [timeSeriesHeader, newSharePriceData] = extractColumnHeaderAndData(sharePriceData);
-  const [_, newIndexPriceData] = extractColumnHeaderAndData(indexPriceData);
+  const { allReturns, ...topReturns } = await analyzeAcquisitions(companyData, sharePriceData, indexPriceData, args);
 
-  checkArrayLengths(companyData, newSharePriceData, newIndexPriceData);
-
-  const [filteredCompanyData, filteredSharePriceData, filteredIndexPriceData] = filterOutCompaniesAndPricesWhereMarketCapIsTooSmall(companyData, newSharePriceData, newIndexPriceData, args.minMarketCapForAnalyzingInM);
-  const convertedSharePriceData = convertBadPriceDataToNull(filteredSharePriceData);
-  const convertedIndexPriceData = convertBadPriceDataToNull(filteredIndexPriceData);
-
-  const filterResults = (await runOnChunkedThreads(
-    `${workerFolderPath}/calculateFilteredPrices.js`,
-    acquisitionFilters,
-    { companyData: filteredCompanyData, sharePriceData: convertedSharePriceData, indexPriceData: convertedIndexPriceData, minMarketCapForAnalyzingInM: args.minMarketCapForAnalyzingInM }
-  ))
-
-  const filteredResultsWithData = filterResults.filter(({ count }) => count != 0);
-
-  const calculationResults = await runOnChunkedThreads(
-    `${workerFolderPath}/calculateReturns.js`,
-    filteredResultsWithData,
-  );
-
-  const { allReturns, ...topReturns } = processCalculationResults(calculationResults, timeSeriesHeader, args.outputTopNumberCount, args.minAmountOfCompaniesInEachSampleSizeForTopOutput);
   const allReturnsFilePath = `${outputRawAcquisitionsPath}/${regionToAnalyze}.json`;
   const topReturnsFilePath = `${outputAcquisitionsPath}/${regionToAnalyze}.json`;
 
