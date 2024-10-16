@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "predeploy": "cd ui && npm run build",
+    "deploy": "gh-pages -d dist",
     "copy:output": "cp -r ../data/output/ public/",
     "dev": "npm run copy:output && vite",
     "build": "npm run copy:output && vite build",
