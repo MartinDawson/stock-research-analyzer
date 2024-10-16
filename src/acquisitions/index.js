@@ -98,8 +98,8 @@ const main = async () => {
   );
 
   const { allReturns, ...topReturns } = processCalculationResults(calculationResults, timeSeriesHeader, args.outputTopNumberCount, args.minAmountOfCompaniesInEachSampleSizeForTopOutput);
-  const allReturnsFilePath = `${outputRawAcquisitionsPath}/acquisitions_${regionToAnalyze}.json`;
-  const topReturnsFilePath = `${outputAcquisitionsPath}/acquisitions_${regionToAnalyze}.json`;
+  const allReturnsFilePath = `${outputRawAcquisitionsPath}/${regionToAnalyze}.json`;
+  const topReturnsFilePath = `${outputAcquisitionsPath}/${regionToAnalyze}.json`;
 
   console.log(`Streaming output for all raw returns to ${allReturnsFilePath} & top returns to ${topReturnsFilePath}`);
 
