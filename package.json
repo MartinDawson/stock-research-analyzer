@@ -12,7 +12,8 @@
   "scripts": {
     "test": "vitest",
     "analyze": "npm run analyze:acquisitions:us",
-    "analyze:acquisitions:us": "node ./src/acquisitions/index.js ./data/input/acquisitions/us/data.csv ./data/input/acquisitions/us/acquirerSharePrices.csv ./data/input/acquisitions/us/acquirerSPXIndexPrices.csv --outputTopNumberCount 30 --minMarketCapForAnalyzingInM 10 --minAmountOfCompaniesInEachSampleSizeForTopOutput 500"
+    "analyze:acquisitions:us": "node ./src/acquisitions/index.js us",
+    "analyze:acquisitions:uk": "node ./src/acquisitions/index.js uk"
   },
   "devDependencies": {
     "vitest": "^2.1.2"

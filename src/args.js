@@ -2,9 +2,7 @@ export const parseArguments = () => {
   const args = process.argv.slice(2);
 
   const parsedArgs = {
-    companyDataFile: args[0],
-    sharePriceDataFile: args[1],
-    indexPriceDataFile: args[2],
+    regionToAnalyze: args[0],
     outputTopNumberCount: 30,
     minMarketCapForAnalyzingInM: 10,
     minAmountOfCompaniesInEachSampleSizeForTopOutput: 500,

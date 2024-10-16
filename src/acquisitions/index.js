@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import { createWriteStream } from 'fs';
+import path from 'path';
 import dayjs from 'dayjs';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
@@ -13,6 +14,13 @@ import { acquisitionFilters } from './acquisitionFilters.js';
 import { processCalculationResults } from './outputData.js';
 import { colsInData } from '../consts.js';
 import { parseArguments } from '../args.js'
+import { rootDirPath } from '../utils.js';
+
+const inputAcquisitionsPath = path.join(rootDirPath, 'data', 'input/acquisitions');
+const outputAcquisitionsPath = path.join(rootDirPath, 'data', 'output/acquisitions');
+const outputRawAcquisitionsPath = path.join(rootDirPath, 'data', 'outputRaw/acquisitions');
+
+const workerFolderPath = path.join(rootDirPath, 'src/acquisitions/workers');
 
 dayjs.extend(customParseFormat);
 
@@ -55,10 +63,17 @@ const writeJsonToFile = async (data, filePath) => {
 
 const main = async () => {
   const args = parseArguments();
-  const fileContent = await fs.readFile(args.companyDataFile, 'utf8');
+  const regionToAnalyze = args.regionToAnalyze;
+
+  const inputCompanyDataFile = `${inputAcquisitionsPath}/${regionToAnalyze}/companies_data.csv`;
+  const fileContent = await fs.readFile(inputCompanyDataFile, 'utf8');
   const companyData = await processAcquisitionData(fileContent);
-  const sharePriceData = await processTimeseriesData(args.sharePriceDataFile, colsInData)
-  const indexPriceData = await processTimeseriesData(args.indexPriceDataFile, colsInData)
+
+  const sharePriceDataPath = `${inputAcquisitionsPath}/${regionToAnalyze}/acquirer_share_prices.csv`;
+  const sharePriceData = await processTimeseriesData(sharePriceDataPath, colsInData)
+
+  const indexPriceDataPath = `${inputAcquisitionsPath}/${regionToAnalyze}/acquirer_index_prices.csv`;
+  const indexPriceData = await processTimeseriesData(indexPriceDataPath, colsInData)
 
   const [timeSeriesHeader, newSharePriceData] = extractColumnHeaderAndData(sharePriceData);
   const [_, newIndexPriceData] = extractColumnHeaderAndData(indexPriceData);
@@ -70,7 +85,7 @@ const main = async () => {
   const convertedIndexPriceData = convertBadPriceDataToNull(filteredIndexPriceData);
 
   const filterResults = (await runOnChunkedThreads(
-    './src/acquisitions/workers/calculateFilteredPrices.js',
+    `${workerFolderPath}/calculateFilteredPrices.js`,
     acquisitionFilters,
     { companyData: filteredCompanyData, sharePriceData: convertedSharePriceData, indexPriceData: convertedIndexPriceData, minMarketCapForAnalyzingInM: args.minMarketCapForAnalyzingInM }
   ))
@@ -78,13 +93,13 @@ const main = async () => {
   const filteredResultsWithData = filterResults.filter(({ count }) => count != 0);
 
   const calculationResults = await runOnChunkedThreads(
-    './src/acquisitions/workers/calculateReturns.js',
+    `${workerFolderPath}/calculateReturns.js`,
     filteredResultsWithData,
   );
 
   const { allReturns, ...topReturns } = processCalculationResults(calculationResults, timeSeriesHeader, args.outputTopNumberCount, args.minAmountOfCompaniesInEachSampleSizeForTopOutput);
-  const allReturnsFilePath = './data/outputRaw/acquisitionsUS.json';
-  const topReturnsFilePath = './data/output/acquisitionsTopUS.json';
+  const allReturnsFilePath = `${outputRawAcquisitionsPath}/acquisitions_${regionToAnalyze}.json`;
+  const topReturnsFilePath = `${outputAcquisitionsPath}/acquisitions_${regionToAnalyze}.json`;
 
   console.log(`Streaming output for all raw returns to ${allReturnsFilePath} & top returns to ${topReturnsFilePath}`);
 

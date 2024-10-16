@@ -21,7 +21,7 @@ const AcquisitionCharts = () => {
   const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
-    fetch('/output/acquisitionsTopUS.json')
+    fetch('/output/acquisitions_us.json')
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');

@@ -84,7 +84,7 @@ The value in each row for this is this formula: `=CIQ(Identifier,"IQ_MARKETCAP",
 You can run the script with different values for arguments too, i.e here's the command that's run by default:
 
 ```bash
-node ./src/acquisitions/index.js ./data/input/acquisitions/us/data.csv ./data/input/acquisitions/us/acquirerSharePrices.csv ./data/input/acquisitions/us/acquirerSPXIndexPrices.csv --outputTopNumberCount 30 --minMarketCapForAnalyzingInM 10 --minAmountOfCompaniesInEachSampleSize 500"
+node ./src/acquisitions/index.js us --outputTopNumberCount 30 --minMarketCapForAnalyzingInM 10 --minAmountOfCompaniesInEachSampleSize 500"
 ```
 
 `outputTopNumberCount` -> Default 30: number of results to output for the `./data/output/acquisitionsTopUS.json` file: `worstReturnsSinceAcquisition`, `bestReturnsSinceAcquisition`, `worstDrawdowns`, `bestPeaks`.
