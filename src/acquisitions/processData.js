@@ -16,15 +16,25 @@ const extractId = (field) => {
   return match ? match[0] : null;
 };
 
+const isValidNumber = (value) => {
+  const number = parseFloat(value);
+
+  if (number === 0) {
+    return false;
+  }
+
+  return Number.isFinite(number);
+};
+
 export const processAcquisitionData = (fileContent) => {
   const records = parse(fileContent, {
     columns: true
   });
 
   const mappedRecords = records.map(row => {
-    const buyerMarketValue = row['Buyer: Market Capitalization ($M)'] === '0' ? null : parseFloat(row['Buyer: Market Capitalization ($M)']);
-    const sellerMarketValue = row['Target: Market Capitalization ($M)'] === 'NA' ? null : parseFloat(row['Target: Market Capitalization ($M)']);
-    const transactionSize = row['Total Transaction Value ($M)'] === 'NA' ? null : parseFloat(row['Total Transaction Value ($M)']);
+    const buyerMarketValue = isValidNumber(row['Buyer: Market Capitalization']) ? parseFloat(row['Buyer: Market Capitalization']) : null;
+    const sellerMarketValue = isValidNumber(row['Target: Market Capitalization']) ? parseFloat(row['Target: Market Capitalization']) : null;
+    const transactionSize = isValidNumber(row['Total Transaction Value']) ? parseFloat(row['Total Transaction Value']) : null;
 
     return {
       announcedDate: dayjs(row['Announced Date MM/dd/yyyy'], 'DD/MM/YYYY').toDate(),

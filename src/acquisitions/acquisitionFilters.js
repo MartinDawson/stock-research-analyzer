@@ -2,26 +2,26 @@ import dayjs from 'dayjs';
 
 const today = dayjs().format('YYYY-MM-DD');
 
-const dateRanges = [
+export const dateRanges = [
   { type: 'all', start: '1900-01-01', end: today },
   { type: '2000-2007', start: '2000-01-01', end: '2007-12-31' },
   { type: '2008-2015', start: '2008-01-01', end: '2015-12-31' },
   { type: '2016-today', start: '2016-01-01', end: today }
 ];
 
-const acquisitionTypes = [
+export const acquisitionTypes = [
   'all',
   'majority',
   'minority'
 ];
 
-const acquisitionStatus = [
+export const acquisitionStatus = [
   'all',
   'withdrawn/terminated',
   'completed'
 ];
 
-const acquisitionsNumbers = [
+export const acquisitionsNumbers = [
   'all',
   '1',
   '2-5',
@@ -29,13 +29,13 @@ const acquisitionsNumbers = [
   '>20'
 ];
 
-const acquisitionPublicOrPrivates = [
+export const acquisitionPublicOrPrivates = [
   'all',
   'public',
   'private'
 ];
 
-const acquisitionSizeByTransactionValues = [
+export const acquisitionSizeByTransactionValues = [
   'all',
   '0-2%',
   '2-10%',
@@ -45,7 +45,7 @@ const acquisitionSizeByTransactionValues = [
   '>100%'
 ];
 
-const acquirerMarketCaps = [
+export const acquirerMarketCaps = [
   'all',
   '10m-50m',
   '50m-300m',

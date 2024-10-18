@@ -70,12 +70,12 @@ And for the 'Display' columns that were exported I had the following:
 - Transaction Type
 - M&A Feature Type
 - Transaction Status
-- "Total Transaction Value ($M)"
+- "Total Transaction Value"
 - "SPCIQ ID (Buyer/Investor)"
 - "SPCIQ ID (Target/Issuer)"
-- "Target: Market Capitalization ($M)"
+- "Target: Market Capitalization"
 
-Then I clicked 'export' to export to csv in S&PCapitalIQ Pro. Note how the `"Buyer: Market Capitalization ($M)"` column is missing from the above, this is because S&PCapitalIQ display columns did not contain this information. So after I exported the results I had to open it in Excel and add this column manually to the end: "Buyer: Market Capitalization ($M)".
+Then I clicked 'export' to export to csv in S&PCapitalIQ Pro. Note how the `"Buyer: Market Capitalization"` column is missing from the above, this is because S&PCapitalIQ display columns did not contain this information. So after I exported the results I had to open it in Excel and add this column manually to the end: "Buyer: Market Capitalization".
 
 The value in each row for this is this formula: `=CIQ(Identifier,"IQ_MARKETCAP",Date)` to get the market cap value (requires S&PCapitalIQPro excel license.)
 
