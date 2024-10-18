@@ -1,3 +1,5 @@
+import { acquirerMarketCaps, acquisitionDealTypeMap, acquisitionPublicOrPrivates, acquisitionSizeByTransactionValues, acquisitionsNumbers, acquisitionStatus, acquisitionTypes, dateRanges } from "./acquisitionFilters.js";
+
 function createConsolidatedReturns(filters, avgCumulativeAbnormalReturns, countPerMonth, timeSeriesHeader) {
   const month0Value = avgCumulativeAbnormalReturns[5];
 
@@ -37,39 +39,70 @@ function getTopReturns(returns, count, metric, ascending = true) {
   return sortedReturns.slice(0, count);
 }
 
-function analyzeTypeOfAcquisition(returns) {
-  const filterReturns = {};
-  const filterCounts = {};
+function analyzeIndividualFilterTypes(returns) {
+  const results = {};
 
-  returns.forEach(item => {
-    const filters = item.filters;
-    const finalReturn = item.averageCumulativeAbnormalReturnsSinceAcquisition[item.averageCumulativeAbnormalReturnsSinceAcquisition.length - 1];
+  const analyzeFilter = (filterKey, filterValue) => {
+    const matchingReturn = returns.find(({ filters }) =>
+      Object.entries(filters).every(([key, value]) =>
+        key === filterKey ? value === filterValue : value === 'all'
+      )
+    );
 
-    if (finalReturn !== null) {
-      Object.entries(filters).forEach(([filterType, filterValue]) => {
-        const filterKey = `${filterType}:${filterValue}`;
-        if (!filterReturns[filterKey]) {
-          filterReturns[filterKey] = [];
-          filterCounts[filterKey] = 0;
-        }
-        filterReturns[filterKey].push(finalReturn);
-        filterCounts[filterKey]++;
-      });
+    if (!matchingReturn) {
+      throw new Error('filter match could not be found')
     }
-  });
 
-  const averageReturns = Object.entries(filterReturns).map(([filterKey, returns]) => {
-    const averageReturnSinceAcquisition = returns.reduce((sum, value) => sum + value, 0) / returns.length;
+    const { averageCumulativeAbnormalReturnsSinceAcquisition, count: totalCount } = matchingReturn;
+    const finalReturn = averageCumulativeAbnormalReturnsSinceAcquisition[averageCumulativeAbnormalReturnsSinceAcquisition.length - 1];
+
     return {
-      filter: filterKey,
-      averageReturnSinceAcquisition: Number(averageReturnSinceAcquisition.toFixed(2)),
-      count: filterCounts[filterKey]
+      count: totalCount,
+      averageReturnSinceAcquisition: finalReturn
     };
-  });
+  };
 
-  averageReturns.sort((a, b) => b.averageReturnSinceAcquisition - a.averageReturnSinceAcquisition);
+  results.dealTypes = Object.values(acquisitionDealTypeMap).map(type => ({
+    type,
+    ...analyzeFilter('dealType', type)
+  }));
 
-  return averageReturns;
+  results.acquisitionTypes = acquisitionTypes.map(type => ({
+    type,
+    ...analyzeFilter('acquisitionType', type)
+  }));
+
+  results.dateRanges = dateRanges.map(range => ({
+    type: range.type,
+    ...analyzeFilter('dateRange', range.type)
+  }));
+
+  results.sizeByTransactionValues = acquisitionSizeByTransactionValues.map(type => ({
+    type,
+    ...analyzeFilter('sizeByTransactionValue', type)
+  }));
+
+  results.publicOrPrivates = acquisitionPublicOrPrivates.map(type => ({
+    type,
+    ...analyzeFilter('publicOrPrivate', type)
+  }));
+
+  results.acquisitionsNumbers = acquisitionsNumbers.map(type => ({
+    type,
+    ...analyzeFilter('acquisitionsNumber', type)
+  }));
+
+  results.acquirerMarketCaps = acquirerMarketCaps.map(type => ({
+    type,
+    ...analyzeFilter('acquirerMarketCap', type)
+  }));
+
+  results.status = acquisitionStatus.map(type => ({
+    type,
+    ...analyzeFilter('status', type)
+  }));
+
+  return results;
 }
 
 export function processCalculationResults(calculationResults, timeSeriesHeader, outputTopNumberCount, minAmountOfCompaniesInEachSampleSizeForTopOutput) {
@@ -83,7 +116,7 @@ export function processCalculationResults(calculationResults, timeSeriesHeader, 
     }
   });
 
-  const typeOfAcquisition = analyzeTypeOfAcquisition(returns);
+  const typeOfAcquisition = analyzeIndividualFilterTypes(returns);
   const filteredReturns = returns.filter(({ count }) => count >= minAmountOfCompaniesInEachSampleSizeForTopOutput);
 
   const allAcquisitionsReturn = returns.find(({ filters }) => {

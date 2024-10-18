@@ -1,27 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { sentenceCase } from "change-case";
+import { customSentenceCase, formatPercentage } from '../utils';
 
-function customSentenceCase(str) {
-  const parts = str.split(/([^a-zA-Z0-9]+)/);
-  return parts.map((part, index) => {
-    if (/[a-zA-Z0-9]/.test(part)) {
-      return index === 0 ? sentenceCase(part) : part.toLowerCase();
-    }
-    return part;
-  }).join('');
-}
-
-const formatPercentage = (value) => `${value}%`;
-
-const AcquisitionCharts = () => {
+const AcquisitionCharts = ({ country }) => {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
-    fetch('output/acquisitions/us.json')
+    fetch(`output/acquisitions/${country.toLowerCase()}.json`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -37,7 +26,7 @@ const AcquisitionCharts = () => {
         setError(error.message);
         setIsLoading(false);
       });
-  }, []);
+  }, [country]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -87,15 +76,24 @@ const AcquisitionCharts = () => {
   };
 
   const renderChart = (chartData, chartType) => {
-    if (!chartData || chartData.length === 0) return <div>No data available</div>;
+    if (!chartData) {
+      return <div>No data available</div>;
+    }
 
     if (chartType === 'typeOfAcquisition') {
-      const sortedData = [...chartData].sort((a, b) => b.averageReturnSinceAcquisition - a.averageReturnSinceAcquisition).map((datum) => {
-        return {
+      const dataArray = Object.entries(chartData).flatMap(([key, value]) =>
+        value.map(item => ({
+          ...item,
+          category: key
+        }))
+      );
+
+      const sortedData = dataArray
+        .sort((a, b) => b.averageReturnSinceAcquisition - a.averageReturnSinceAcquisition)
+        .map((datum) => ({
           ...datum,
-          label: customSentenceCase(datum.filter)
-        }
-      });
+          label: customSentenceCase(`${datum.category} ${datum.type}`)
+        }));
 
       return (
         <div className="w-full h-[800px]">
