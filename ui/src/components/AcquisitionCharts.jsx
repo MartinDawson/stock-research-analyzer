@@ -95,7 +95,7 @@ const AcquisitionCharts = ({ country }) => {
       );
 
       const sortedData = dataArray
-        .sort((a, b) => b[returnKey] - a[returnKey])
+        .sort((a, b) => b.averageCumulativeAbnormalReturnSinceAcquisition - a.averageCumulativeAbnormalReturnSinceAcquisition)
         .map((datum) => ({
           ...datum,
           label: customSentenceCase(`${datum.category} ${datum.type}`)
