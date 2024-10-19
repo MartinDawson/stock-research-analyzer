@@ -5,6 +5,10 @@ Pre-requirements to run:
 - Node (tested on node 20.x)
 - Git
 
+## Results with pretty charts
+
+https://martindawson.github.io/stock-research-analyzer/
+
 ## To Run
 
 - Git clone git@github.com:MartinDawson/stock-research-analyzer.git
