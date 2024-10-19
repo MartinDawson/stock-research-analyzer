@@ -11,7 +11,7 @@
   },
   "scripts": {
     "test": "vitest",
-    "analyze": "npm run analyze:acquisitions:us",
+    "analyze": "npm run analyze:acquisitions:uk && npm run analyze:acquisitions:us",
     "analyze:acquisitions:us": "node ./src/acquisitions/index.js us",
     "analyze:acquisitions:uk": "node ./src/acquisitions/index.js uk"
   },

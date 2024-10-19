@@ -154,6 +154,8 @@ export const getFilterSharePriceIndexData = (companyData, sharePriceData, indexP
     }
 
     const isCorrectNumberOfAcquisitions = (company) => {
+      if (acquisitionsNumber === 'all') return true;
+
       const identifier = company.buyer.identifier;
       const numberOfAcquisitions = uniqueCompaniesAcquisitionsData[identifier].length;
 

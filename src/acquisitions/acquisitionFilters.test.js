@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getFilterSharePriceIndexData } from './acquisitionFilters';
+import { acquirerMarketCaps, getFilterSharePriceIndexData } from './acquisitionFilters';
 
 describe('getFilterSharePriceIndexData', () => {
   const mockCompanyData = [
@@ -69,15 +69,21 @@ describe('getFilterSharePriceIndexData', () => {
 
   const filterFunction = getFilterSharePriceIndexData(mockCompanyData, mockSharePriceData, mockIndexPriceData);
 
+  const allFilters = {
+    dateRange: 'all',
+    status: 'all',
+    acquisitionType: 'all',
+    dealType: 'all',
+    acquirerMarketCap: 'all',
+    publicOrPrivate: 'all',
+    sizeByTransactionValue: 'all',
+    acquisitionsNumber: 'all'
+  }
+
   it('should filter by date range', () => {
     const filters = {
-      dateRange: '2016-today',
-      status: 'all',
-      acquisitionType: 'all',
-      dealType: 'all',
-      publicOrPrivate: 'all',
-      sizeByTransactionValue: 'all',
-      acquisitionsNumber: 'all'
+      ...allFilters,
+      dateRange: '2016-today'
     };
     const [filteredSharePrices, filteredIndexPrices] = filterFunction(filters);
     expect(filteredSharePrices).toEqual([[200, 210, 220], [300, 310, 320], [400, 410, 420], [350, 350, 350]]);
@@ -86,13 +92,8 @@ describe('getFilterSharePriceIndexData', () => {
 
   it('should filter by acquisition type', () => {
     const filters = {
-      dateRange: 'all',
-      status: 'all',
-      acquisitionType: 'minority',
-      dealType: 'all',
-      publicOrPrivate: 'all',
-      sizeByTransactionValue: 'all',
-      acquisitionsNumber: 'all'
+      ...allFilters,
+      acquisitionType: 'minority'
     };
     const [filteredSharePrices, filteredIndexPrices] = filterFunction(filters);
     expect(filteredSharePrices).toEqual([[200, 210, 220]]);
@@ -101,13 +102,8 @@ describe('getFilterSharePriceIndexData', () => {
 
   it('should filter by acquisition status', () => {
     const filters = {
-      dateRange: 'all',
-      status: 'withdrawn/terminated',
-      acquisitionType: 'all',
-      dealType: 'all',
-      publicOrPrivate: 'all',
-      sizeByTransactionValue: 'all',
-      acquisitionsNumber: 'all'
+      ...allFilters,
+      status: 'withdrawn/terminated'
     };
     const [filteredSharePrices, filteredIndexPrices] = filterFunction(filters);
     expect(filteredSharePrices).toEqual([[200, 210, 220]]);
@@ -116,13 +112,8 @@ describe('getFilterSharePriceIndexData', () => {
 
   it('should filter by public or private', () => {
     const filters = {
-      dateRange: 'all',
-      status: 'all',
-      acquisitionType: 'all',
-      dealType: 'all',
-      publicOrPrivate: 'public',
-      sizeByTransactionValue: 'all',
-      acquisitionsNumber: 'all'
+      ...allFilters,
+      publicOrPrivate: 'public'
     };
     const [filteredSharePrices, filteredIndexPrices] = filterFunction(filters);
     expect(filteredSharePrices).toEqual([[100, 110, 120], [300, 310, 320], [350, 350, 350]]);
@@ -131,13 +122,8 @@ describe('getFilterSharePriceIndexData', () => {
 
   it('should filter by deal type', () => {
     const filters = {
-      dateRange: 'all',
-      status: 'all',
-      acquisitionType: 'all',
-      dealType: 'cashDeal',
-      publicOrPrivate: 'all',
-      sizeByTransactionValue: 'all',
-      acquisitionsNumber: 'all'
+      ...allFilters,
+      dealType: 'cashDeal'
     };
     const [filteredSharePrices, filteredIndexPrices] = filterFunction(filters);
     expect(filteredSharePrices).toEqual([[100, 110, 120], [300, 310, 320]]);
@@ -146,13 +132,8 @@ describe('getFilterSharePriceIndexData', () => {
 
   it('should filter by transaction size', () => {
     const filters = {
-      dateRange: 'all',
-      status: 'all',
-      acquisitionType: 'all',
-      dealType: 'all',
-      publicOrPrivate: 'all',
-      sizeByTransactionValue: '10-25%',
-      acquisitionsNumber: 'all'
+      ...allFilters,
+      sizeByTransactionValue: '10-25%'
     };
     const [filteredSharePrices, filteredIndexPrices] = filterFunction(filters);
     expect(filteredSharePrices).toEqual([[100, 110, 120], [200, 210, 220]]);
@@ -161,13 +142,9 @@ describe('getFilterSharePriceIndexData', () => {
 
   it('should return empty arrays when no data matches the filters', () => {
     const filters = {
+      ...allFilters,
       dateRange: '2016-today',
-      status: 'all',
-      acquisitionType: 'all',
-      dealType: 'minorityGainingMajority',
-      publicOrPrivate: 'all',
-      sizeByTransactionValue: 'all',
-      acquisitionsNumber: 'all'
+      dealType: 'minorityGainingMajority'
     };
     const [filteredSharePrices, filteredIndexPrices] = filterFunction(filters);
     expect(filteredSharePrices).toEqual([]);
@@ -176,13 +153,9 @@ describe('getFilterSharePriceIndexData', () => {
 
   it('should filter by date range and deal type', () => {
     const filters = {
+      ...allFilters,
       dateRange: '2016-today',
-      status: 'all',
-      acquisitionType: 'all',
-      dealType: 'stockDeal',
-      publicOrPrivate: 'all',
-      sizeByTransactionValue: 'all',
-      acquisitionsNumber: 'all'
+      dealType: 'stockDeal'
     };
     const [filteredSharePrices, filteredIndexPrices] = filterFunction(filters);
     expect(filteredSharePrices).toEqual([[200, 210, 220], [400, 410, 420]]);
@@ -191,13 +164,9 @@ describe('getFilterSharePriceIndexData', () => {
 
   it('should filter by acquisition type and public/private status', () => {
     const filters = {
-      dateRange: 'all',
-      status: 'all',
+      ...allFilters,
       acquisitionType: 'majority',
-      dealType: 'all',
-      publicOrPrivate: 'public',
-      sizeByTransactionValue: 'all',
-      acquisitionsNumber: 'all'
+      publicOrPrivate: 'public'
     };
     const [filteredSharePrices, filteredIndexPrices] = filterFunction(filters);
     expect(filteredSharePrices).toEqual([[100, 110, 120], [300, 310, 320], [350, 350, 350]]);
@@ -206,13 +175,9 @@ describe('getFilterSharePriceIndexData', () => {
 
   it('should filter by transaction size and acquisition status', () => {
     const filters = {
-      dateRange: 'all',
+      ...allFilters,
       status: 'completed',
-      acquisitionType: 'all',
-      dealType: 'all',
-      publicOrPrivate: 'all',
-      sizeByTransactionValue: '50-100%',
-      acquisitionsNumber: 'all'
+      sizeByTransactionValue: '50-100%'
     };
     const [filteredSharePrices, filteredIndexPrices] = filterFunction(filters);
     expect(filteredSharePrices).toEqual([[400, 410, 420]]);
@@ -221,13 +186,8 @@ describe('getFilterSharePriceIndexData', () => {
 
   it('should filter by multiple deal types', () => {
     const filters = {
-      dateRange: 'all',
-      status: 'all',
-      acquisitionType: 'all',
-      dealType: 'cashDeal',
-      publicOrPrivate: 'all',
-      sizeByTransactionValue: 'all',
-      acquisitionsNumber: 'all'
+      ...allFilters,
+      dealType: 'cashDeal'
     };
     const [filteredSharePrices, filteredIndexPrices] = filterFunction(filters);
     expect(filteredSharePrices).toEqual([[100, 110, 120], [300, 310, 320]]);
@@ -236,12 +196,8 @@ describe('getFilterSharePriceIndexData', () => {
 
   it('should filter by acquisition number and date range', () => {
     const filters = {
+      ...allFilters,
       dateRange: '2016-today',
-      status: 'all',
-      acquisitionType: 'all',
-      dealType: 'all',
-      publicOrPrivate: 'all',
-      sizeByTransactionValue: 'all',
       acquisitionsNumber: '2-5'
     };
     const [filteredSharePrices, filteredIndexPrices] = filterFunction(filters);

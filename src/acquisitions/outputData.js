@@ -50,7 +50,12 @@ function analyzeIndividualFilterTypes(returns) {
     );
 
     if (!matchingReturn) {
-      throw new Error('filter match could not be found')
+      console.warn(`No matching return found for ${filterKey}:${filterValue}`)
+
+      return {
+        count: 0,
+        averageReturnSinceAcquisition: null
+      };
     }
 
     const { averageCumulativeAbnormalReturnsSinceAcquisition, count: totalCount } = matchingReturn;
