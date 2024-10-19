@@ -1,19 +1,5 @@
 import { acquirerMarketCaps, acquisitionDealTypeMap, acquisitionPublicOrPrivates, acquisitionSizeByTransactionValues, acquisitionsNumbers, acquisitionStatus, acquisitionTypes, dateRanges } from "./acquisitionFilters.js";
 
-function createConsolidatedReturns(filters, avgCumulativeAbnormalReturns, countPerMonth, timeSeriesHeader) {
-  const month0Value = avgCumulativeAbnormalReturns[5];
-
-  return {
-    filters,
-    months: timeSeriesHeader,
-    counts: countPerMonth,
-    averageCumulativeAbnormalReturns: avgCumulativeAbnormalReturns,
-    averageCumulativeAbnormalReturnsSinceAcquisition: avgCumulativeAbnormalReturns.map((returnValue, index) =>
-      index >= 5 && returnValue !== null ? returnValue - month0Value : null
-    )
-  };
-}
-
 function getTopReturns(returns, count, metric, ascending = true) {
   const getMetricValue = (item) => {
     const returnsSinceAcquisition = item.averageCumulativeAbnormalReturnsSinceAcquisition.slice(5);
@@ -63,7 +49,7 @@ function analyzeIndividualFilterTypes(returns) {
 
     return {
       count: totalCount,
-      averageReturnSinceAcquisition: finalReturn
+      averageCumulativeAbnormalReturnSinceAcquisition: finalReturn
     };
   };
 
@@ -110,15 +96,23 @@ function analyzeIndividualFilterTypes(returns) {
   return results;
 }
 
+const getSinceAcquisitionMapper = (month0Value) => (returnValue, index) => index >= 5 && returnValue !== null ? returnValue - month0Value : null
+
 export function processCalculationResults(calculationResults, timeSeriesHeader, outputTopNumberCount, minAmountOfCompaniesInEachSampleSizeForTopOutput) {
-  const returns = calculationResults.map(({ filters, data, count }) => {
-    const [avgCumulativeAbnormalReturns, countPerMonth] = data;
-    const returnsObject = createConsolidatedReturns(filters, avgCumulativeAbnormalReturns, countPerMonth, timeSeriesHeader);
+  const returns = calculationResults.map(({ filters, data: { averageCumulativeReturns, averageCumulativeAbnormalReturns }, count }) => {
+    const [avgCumulativeAbnormalReturns, countPerMonth] = averageCumulativeAbnormalReturns;
+    const [avgCumulativeReturns] = averageCumulativeReturns;
 
     return {
-      ...returnsObject,
-      count
-    }
+      filters,
+      months: timeSeriesHeader,
+      counts: countPerMonth,
+      count,
+      averageCumulativeReturns: avgCumulativeReturns,
+      averageCumulativeReturnsSinceAcquisition: avgCumulativeReturns.map(getSinceAcquisitionMapper(avgCumulativeReturns[5])),
+      averageCumulativeAbnormalReturns: avgCumulativeAbnormalReturns,
+      averageCumulativeAbnormalReturnsSinceAcquisition: avgCumulativeAbnormalReturns.map(getSinceAcquisitionMapper(avgCumulativeAbnormalReturns[5]))
+    };
   });
 
   const typeOfAcquisition = analyzeIndividualFilterTypes(returns);

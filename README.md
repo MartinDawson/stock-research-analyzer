@@ -41,7 +41,7 @@ First of all, correlation does not equal causation, however we can see the follo
 
 Possible causes of the rebound could be that managament have impaired and written off goodwill related to the acquisition by this point and realised they have overpaid or most of the acquisition related distractions on business performance has passed at this point.
 
-- UK companies actually created value overall. Modest in the first 20 months, beating the FTSE All Share Index by 3% but by month 29 the gain over the index from these compaies was 10.20%. TODO: Add why.
+- UK companies actually created value overall. Modest in the first 20 months, beating the FTSE All Share Index by 3% but by month 29 the gain over the index from these compaies was 10.20%. If you toggle the 'absolute returns' radio button on the website, you will see the returns of the acquiring companies without being relative to their respective indexes. You can see that the US companies destroy value both relatively and absolutely with acquisitions while UK companies create it. I have no idea why this gap exists between the UK and US acquiring companies.
 
 Note: The UK has a lower total sample size of 10k~ companies, whereas the US has 40k~ companies, however 10k should still be more than enough.
 
@@ -57,7 +57,7 @@ In both the US and UK their was a very similar pattern.
 
 - Management Participated acquisitions seem to do decend as well, giving 8.22% abnormal returns for US and 32% for UK. This might be explained by management putting their own money in as part of the deal so they are more incentivized or confident that the acquisition is correct. Note the small sample size for US companies of 120 and UK of 149 though.
 
-- Larger cap acquirers seem to perform significantly better than smaller cap acquirers. TODO: Double check data seems wrong for >$200b.
+- Larger cap acquirers seem to perform significantly better than smaller cap acquirers.
 
 - Companies that do multiple acquisitions still destroy value, but they destroy much less value than companies that do a single acquisition. You can see companies that did a single acquisition had a -60% return for the US and -15% for the UK. This had a large sample size of 3355 as well.
 

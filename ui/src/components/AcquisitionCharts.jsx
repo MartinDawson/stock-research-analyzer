@@ -8,6 +8,7 @@ const AcquisitionCharts = ({ country }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [returnType, setReturnType] = useState('abnormal');
 
   useEffect(() => {
     fetch(`output/acquisitions/${country.toLowerCase()}.json`)
@@ -33,16 +34,19 @@ const AcquisitionCharts = ({ country }) => {
 
   const chartTypes = Object.keys(data).filter(key => key !== 'allAcquisitionsReturn').map((key) => ({
     name: sentenceCase(key), key
-  }))
+  }));
 
   const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#001CCE', '#00B3E6', '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D', '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A'];
+
+  const getReturnKey = () => returnType === 'abnormal' ? 'averageCumulativeAbnormalReturnsSinceAcquisition' : 'averageCumulativeReturnsSinceAcquisition';
 
   const renderAllAcquisitionsChart = (allAcquisitionsData) => {
     if (!allAcquisitionsData) return null;
 
+    const returnKey = getReturnKey();
     const chartData = allAcquisitionsData.months.map((month, index) => ({
       month,
-      returns: allAcquisitionsData.averageCumulativeAbnormalReturnsSinceAcquisition[index],
+      returns: allAcquisitionsData[returnKey][index],
       count: allAcquisitionsData.counts[index],
     })).filter(item => item.returns !== null);
 
@@ -59,14 +63,14 @@ const AcquisitionCharts = ({ country }) => {
               />
               <YAxis
                 tickFormatter={formatPercentage}
-                label={{ value: 'Cumulative Abnormal Returns', angle: -90, position: 'insideLeft', offset: 10 }}
+                label={{ value: `Cumulative ${returnType === 'abnormal' ? 'Abnormal ' : ''}Returns`, angle: -90, position: 'insideLeft', offset: 10 }}
               />
               <Tooltip
                 formatter={(value, name) => [formatPercentage(value), 'Returns']}
                 labelFormatter={(value) => `Month: ${value}`}
               />
               <Legend />
-              <Bar dataKey="returns" fill="#8884d8" name="Cumulative Abnormal Returns" />
+              <Bar dataKey="returns" fill="#8884d8" name={`Cumulative ${returnType === 'abnormal' ? 'Abnormal ' : ''}Returns`} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -80,6 +84,8 @@ const AcquisitionCharts = ({ country }) => {
       return <div>No data available</div>;
     }
 
+    const returnKey = getReturnKey();
+
     if (chartType === 'typeOfAcquisition') {
       const dataArray = Object.entries(chartData).flatMap(([key, value]) =>
         value.map(item => ({
@@ -89,7 +95,7 @@ const AcquisitionCharts = ({ country }) => {
       );
 
       const sortedData = dataArray
-        .sort((a, b) => b.averageReturnSinceAcquisition - a.averageReturnSinceAcquisition)
+        .sort((a, b) => b[returnKey] - a[returnKey])
         .map((datum) => ({
           ...datum,
           label: customSentenceCase(`${datum.category} ${datum.type}`)
@@ -110,7 +116,7 @@ const AcquisitionCharts = ({ country }) => {
               />
               <Tooltip formatter={formatPercentage} />
               <Legend />
-              <Bar dataKey="averageReturnSinceAcquisition" fill="#8884d8" name="Avg Abnormal Returns Since Acquisition" />
+              <Bar dataKey="averageCumulativeAbnormalReturnSinceAcquisition" fill="#8884d8" name="Avg Abnormal returns Since Acquisition" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -118,12 +124,11 @@ const AcquisitionCharts = ({ country }) => {
     }
     // For other chart types
     const xAxisKey = 'months';
-    const yAxisKey = 'averageCumulativeAbnormalReturnsSinceAcquisition';
 
     const processedData = chartData[0][xAxisKey].map((x, i) => {
       const point = { [xAxisKey]: x };
       chartData.forEach((dataset, index) => {
-        point[`data${index}`] = dataset[yAxisKey][i];
+        point[`data${index}`] = dataset[returnKey][i];
       });
       return point;
     }).filter(item => Object.values(item).some(val => val !== null && val !== undefined));
@@ -155,7 +160,7 @@ const AcquisitionCharts = ({ country }) => {
               />
               <YAxis
                 tickFormatter={formatPercentage}
-                label={{ value: 'Cumulative Abnormal Returns', angle: -90, position: 'insideLeft' }}
+                label={{ value: `Cumulative ${returnType === 'abnormal' ? 'Abnormal ' : ''}Returns`, angle: -90, position: 'insideLeft' }}
               />
               {chartData.map((dataset, index) => (
                 <Line
@@ -181,6 +186,33 @@ const AcquisitionCharts = ({ country }) => {
   return (
     <div className="w-full p-4">
       <h1 className="text-2xl font-bold mb-4">Acquisition Performance Charts</h1>
+
+      <div className="mb-4">
+        <div className="flex space-x-4">
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              className="form-radio"
+              name="return-type"
+              value="abnormal"
+              checked={returnType === 'abnormal'}
+              onChange={(e) => setReturnType(e.target.value)}
+            />
+            <span className="ml-2">Abnormal Returns</span>
+          </label>
+          <label className="inline-flex items-center">
+            <input
+              type="radio"
+              className="form-radio"
+              name="return-type"
+              value="absolute"
+              checked={returnType === 'absolute'}
+              onChange={(e) => setReturnType(e.target.value)}
+            />
+            <span className="ml-2">Absolute Returns</span>
+          </label>
+        </div>
+      </div>
 
       {renderAllAcquisitionsChart(data?.allAcquisitionsReturn)}
 

@@ -85,9 +85,14 @@ function calculateReturns(sharePriceData, indexPriceData) {
   const indexMonthlyReturns = calculateMonthlyReturns(indexPriceData);
 
   const monthlyAbnormalReturns = calculateAbnormalReturns(shareMonthlyReturns, indexMonthlyReturns);
+
+  const cumulativeReturns = calculateCumulativeReturns(shareMonthlyReturns);
   const cumulativeAbnormalReturns = calculateCumulativeReturns(monthlyAbnormalReturns);
 
-  return calculateAverageMonthlyReturns(cumulativeAbnormalReturns);
+  return {
+    averageCumulativeReturns: calculateAverageMonthlyReturns(cumulativeReturns),
+    averageCumulativeAbnormalReturns: calculateAverageMonthlyReturns(cumulativeAbnormalReturns)
+  };
 }
 
 export { calculateReturns, calculateMonthlyReturns, calculateAverageMonthlyReturns, calculateCumulativeReturns, calculateAbnormalReturns };
