@@ -110,7 +110,7 @@ const AcquisitionCharts = ({ country }) => {
               />
               <Tooltip formatter={formatPercentage} />
               <Legend />
-              <Bar dataKey="averageReturnSinceAcquisition" fill="#8884d8" name="Avg Return Since Acquisition" />
+              <Bar dataKey="averageReturnSinceAcquisition" fill="#8884d8" name="Avg Abnormal Returns Since Acquisition" />
             </BarChart>
           </ResponsiveContainer>
         </div>

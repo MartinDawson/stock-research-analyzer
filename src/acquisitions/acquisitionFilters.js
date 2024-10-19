@@ -160,8 +160,9 @@ export const getFilterSharePriceIndexData = (companyData, sharePriceData, indexP
       if (acquisitionsNumber === '1') return numberOfAcquisitions === 1;
       if (acquisitionsNumber === '2-5') return numberOfAcquisitions >= 2 && numberOfAcquisitions < 5;
       if (acquisitionsNumber === '5-20') return numberOfAcquisitions >= 5 && numberOfAcquisitions < 20;
+      if (acquisitionsNumber === '>20') return numberOfAcquisitions >= 20;
 
-      return true;
+      return false;
     }
 
     const isCorrectSizeByTransactionValue = (company) => {
@@ -178,8 +179,9 @@ export const getFilterSharePriceIndexData = (companyData, sharePriceData, indexP
       if (sizeByTransactionValue === '10-25%') return transactionSizeRelativeToBuyerMarketValue >= 0.1 && transactionSizeRelativeToBuyerMarketValue < 0.25;
       if (sizeByTransactionValue === '25-50%') return transactionSizeRelativeToBuyerMarketValue >= 0.25 && transactionSizeRelativeToBuyerMarketValue < 0.5;
       if (sizeByTransactionValue === '50-100%') return transactionSizeRelativeToBuyerMarketValue >= 0.5 && transactionSizeRelativeToBuyerMarketValue < 1;
+      if (sizeByTransactionValue === '>100%') return transactionSizeRelativeToBuyerMarketValue >= 1;
 
-      return true;
+      return false;
     }
 
     const isCorrectMarketCapValue = (company) => {
@@ -195,12 +197,14 @@ export const getFilterSharePriceIndexData = (companyData, sharePriceData, indexP
       if (acquirerMarketCap === '300m-2b') return company.buyer.marketValue >= 300 && company.buyer.marketValue < 2000;
       if (acquirerMarketCap === '2b-10b') return company.buyer.marketValue >= 2000 && company.buyer.marketValue < 10000;
       if (acquirerMarketCap === '10b-200b') return company.buyer.marketValue >= 10000 && company.buyer.marketValue < 200000;
+      if (acquirerMarketCap === '>200b') return company.buyer.marketValue >= 200000;
 
-      return true;
+      return false;
     }
 
     const isCorrectDealType = (company) => {
       if (dealType === 'all') return true;
+
       return company.dealTypes.some((type) => type === dealType);
     }
 
