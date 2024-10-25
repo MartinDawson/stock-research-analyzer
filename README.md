@@ -107,7 +107,7 @@ The most important thing in analysis is clean data or the results are useless. I
 
 1. Converts `''` & `0` to `null` values in.
 2. Checks if any percentageChange between 2 numbers is `> 1000%` & `< 100%`, if it is it sets the entire row to be null values as this is most likely bad data rather than a real Month-On-Month change of share prices.
-3. Filters out companies that have <$10m in marketCap size (`minMarketCapForAnalyzingInM` in the args). This is needed to stop nano-caps which have ridicilous % changes sometimes Month-On-Month. These don't really reflect true shareholder value either, just liquidity issues & pumps/dumps a lot of times.
+3. Filters out companies that have <$10m in marketCap size (`minMarketCapForAnalyzingInM` in the args). This is needed to stop nano-caps which have ridiculous % changes sometimes Month-On-Month. These don't really reflect true shareholder value either, just liquidity issues & pumps/dumps a lot of times.
 4. A bunch of tests in `acquisitionFilters.test.js` & `calculate.test.js`. You can verify them with `npm run test`.
 
 I also tested using `math.js` to remove any chance of [`numerical instability`](https://en.wikipedia.org/wiki/Numerical_stability) when calculating cumulative Month-On-Month changes in share prices, however the slowdown in processing speed wasn't worth the tiny bit extra in precision. The small floating point errors don't effect the results either so it was redundant.
@@ -155,7 +155,7 @@ node ./src/acquisitions/index.js us --outputTopNumberCount 30 --minMarketCapForA
 
 Note: `allReturns` always returns everything that matches your other params anyway and ignores this flag.
 
-`minMarketCapForAnalyzingInM` -> Default 10: this is recommended because really small nano caps < $10m in marketcap have some ridicilous percentage changes, you can increase this though if you want only larger market caps in your analysis.
+`minMarketCapForAnalyzingInM` -> Default 10: this is recommended because really small nano caps < $10m in marketcap have some ridiculous percentage changes, you can increase this though if you want only larger market caps in your analysis.
 
 `minAmountOfCompaniesInEachSampleSize` -> Default 500: this determines how much the sample sizes of `worstReturnsSinceAcquisition`, `bestReturnsSinceAcquisition`, `bestPeaks` and `worstDrawdowns` need to have a minimum of. If you didn't have this then the top results in these arrays would be ones with really low sample sizes and useless for drawing any conclusions on.
 
