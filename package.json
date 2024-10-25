@@ -2,7 +2,6 @@
   "name": "stock-research-analyzer",
   "type": "module",
   "dependencies": {
-    "axios": "^1.7.7",
     "cli-progress": "^3.12.0",
     "csv-parse": "^5.5.6",
     "csv-writer": "^1.6.0",
@@ -11,9 +10,10 @@
   },
   "scripts": {
     "test": "vitest",
-    "analyze": "npm run analyze:acquisitions:uk && npm run analyze:acquisitions:us",
-    "analyze:acquisitions:us": "node ./src/acquisitions/index.js us",
-    "analyze:acquisitions:uk": "node ./src/acquisitions/index.js uk"
+    "analyze": "npm run acquisitions:uk && npm run acquisitions:us",
+    "acquisitions:us": "node ./src/acquisitions/index.js us",
+    "acquisitions:uk": "node ./src/acquisitions/index.js uk",
+    "macro:uk": "node ./src/macro/index.js uk"
   },
   "devDependencies": {
     "vitest": "^2.1.2"
